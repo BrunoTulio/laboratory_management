@@ -1,0 +1,99 @@
+{{define "content"}}
+<div class="availability-page">
+    <div class="page-header">
+        <h1>Verificar Disponibilidade</h1>
+    </div>
+
+    <div class="availability-form">
+        <div class="form-row">
+            <div class="form-field">
+                <label for="laboratory_id" class="form-label">Laboratório *</label>
+                <select id="laboratory_id" name="laboratory_id" class="form-select" required>
+                    <option value="">Selecione um laboratório</option>
+                    {{range .Laboratories}}
+                        <option value="{{.ID}}">{{.Name}} - {{.Location}}</option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="date" class="form-label">Data *</label>
+                <input 
+                    type="date" 
+                    id="date" 
+                    name="date" 
+                    class="form-input" 
+                    required
+                    min="{{.MinDate}}"
+                >
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="start_time" class="form-label">Horário Início *</label>
+                <input 
+                    type="time" 
+                    id="start_time" 
+                    name="start_time" 
+                    class="form-input" 
+                    required
+                >
+            </div>
+
+            <div class="form-field">
+                <label for="end_time" class="form-label">Horário Fim *</label>
+                <input 
+                    type="time" 
+                    id="end_time" 
+                    name="end_time" 
+                    class="form-input" 
+                    required
+                >
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="check_availability">Verificar Disponibilidade</button>
+    </div>
+
+    <div id="availability_result" class="availability-result">
+        <div class="empty-state">
+            <p>Selecione laboratório, data e horário para verificar disponibilidade.</p>
+        </div>
+    </div>
+
+    <div class="daily-availability-section">
+        <h2>Disponibilidade Diária</h2>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="daily_laboratory_id" class="form-label">Laboratório</label>
+                <select id="daily_laboratory_id" name="daily_laboratory_id" class="form-select">
+                    <option value="">Selecione um laboratório</option>
+                    {{range .Laboratories}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="daily_date" class="form-label">Data</label>
+                <input 
+                    type="date" 
+                    id="daily_date" 
+                    name="daily_date" 
+                    class="form-input"
+                    min="{{.MinDate}}"
+                >
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="view_daily_availability">Ver Agenda do Dia</button>
+        </div>
+
+        <div id="daily_availability_result" class="daily-availability-result">
+            <div class="empty-state">
+                <p>Selecione laboratório e data para ver a agenda do dia.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

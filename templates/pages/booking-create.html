@@ -1,0 +1,125 @@
+{{define "content"}}
+<div class="booking-create-page">
+    <div class="page-header">
+        <h1>Novo Agendamento</h1>
+        <a href="/agendamentos" class="btn btn-secondary">Voltar</a>
+    </div>
+
+    <form method="POST" action="/agendamentos" class="form">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="form-section">
+            <h2>Informações do Agendamento</h2>
+
+            <div class="form-field">
+                <label for="laboratory_id" class="form-label">Laboratório *</label>
+                <select id="laboratory_id" name="laboratory_id" class="form-select" required>
+                    <option value="">Selecione um laboratório</option>
+                    {{range .Laboratories}}
+                        <option value="{{.ID}}" {{if eq .ID $.FormData.LaboratoryID}}selected{{end}}>
+                            {{.Name}} - {{.Location}} (Capacidade: {{.Capacity}})
+                        </option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="booking_date" class="form-label">Data *</label>
+                <input 
+                    type="date" 
+                    id="booking_date" 
+                    name="booking_date" 
+                    class="form-input" 
+                    required
+                    value="{{.FormData.BookingDate}}"
+                    min="{{.MinDate}}"
+                >
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="start_time" class="form-label">Horário Início *</label>
+                    <input 
+                        type="time" 
+                        id="start_time" 
+                        name="start_time" 
+                        class="form-input" 
+                        required
+                        value="{{.FormData.StartTime}}"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="end_time" class="form-label">Horário Fim *</label>
+                    <input 
+                        type="time" 
+                        id="end_time" 
+                        name="end_time" 
+                        class="form-input" 
+                        required
+                        value="{{.FormData.EndTime}}"
+                    >
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="shift" class="form-label">Turno</label>
+                <select id="shift" name="shift" class="form-select">
+                    <option value="">Selecione o turno</option>
+                    <option value="MATUTINO" {{if eq .FormData.Shift "MATUTINO"}}selected{{end}}>Matutino</option>
+                    <option value="VESPERTINO" {{if eq .FormData.Shift "VESPERTINO"}}selected{{end}}>Vespertino</option>
+                    <option value="NOTURNO" {{if eq .FormData.Shift "NOTURNO"}}selected{{end}}>Noturno</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="class_id" class="form-label">Turma</label>
+                <select id="class_id" name="class_id" class="form-select">
+                    <option value="">Selecione uma turma (opcional)</option>
+                    {{range .Classes}}
+                        <option value="{{.ID}}" {{if eq .ID $.FormData.ClassID}}selected{{end}}>
+                            {{.Name}} - {{.Course}} ({{.GradeYear}})
+                        </option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="reason" class="form-label">Motivo *</label>
+                <textarea 
+                    id="reason" 
+                    name="reason" 
+                    class="form-textarea" 
+                    rows="3"
+                    required
+                    placeholder="Descreva o motivo do agendamento"
+                >{{.FormData.Reason}}</textarea>
+            </div>
+
+            <div class="form-field">
+                <label for="observation" class="form-label">Observação</label>
+                <textarea 
+                    id="observation" 
+                    name="observation" 
+                    class="form-textarea" 
+                    rows="2"
+                    placeholder="Informações adicionais (opcional)"
+                >{{.FormData.Observation}}</textarea>
+            </div>
+        </div>
+
+        <div class="availability-check">
+            <h3>Verificar Disponibilidade</h3>
+            <div id="availability_result" class="availability-result">
+                <p>Selecione laboratório, data e horário para verificar disponibilidade.</p>
+            </div>
+            <button type="button" class="btn btn-secondary" id="check_availability">Verificar Disponibilidade</button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Solicitar Agendamento</button>
+            <a href="/agendamentos" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{{end}}

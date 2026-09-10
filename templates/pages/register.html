@@ -1,0 +1,105 @@
+{{define "content"}}
+<div class="register-form">
+    <h2>Cadastro</h2>
+    <p>Crie sua conta para acessar o sistema</p>
+
+    <form method="POST" action="/cadastro" class="form">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+        <div class="form-field">
+            <label for="name" class="form-label">Nome Completo</label>
+            <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                class="form-input" 
+                placeholder="Seu nome completo"
+                required
+                value="{{.FormData.Name}}"
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="email" class="form-label">E-mail</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                class="form-input" 
+                placeholder="seu@email.com"
+                required
+                value="{{.FormData.Email}}"
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="password" class="form-label">Senha</label>
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-input" 
+                placeholder="••••••••"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="confirm_password" class="form-label">Confirmar Senha</label>
+            <input 
+                type="password" 
+                id="confirm_password" 
+                name="confirm_password" 
+                class="form-input" 
+                placeholder="••••••••"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="registration_number" class="form-label">Matrícula</label>
+            <input 
+                type="text" 
+                id="registration_number" 
+                name="registration_number" 
+                class="form-input" 
+                placeholder="Sua matrícula"
+                value="{{.FormData.RegistrationNumber}}"
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="phone" class="form-label">Telefone</label>
+            <input 
+                type="tel" 
+                id="phone" 
+                name="phone" 
+                class="form-input" 
+                placeholder="(00) 00000-0000"
+                value="{{.FormData.Phone}}"
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="role" class="form-label">Perfil</label>
+            <select id="role" name="role_id" class="form-select" required>
+                <option value="">Selecione um perfil</option>
+                {{range .Roles}}
+                    <option value="{{.ID}}" {{if eq .ID $.FormData.RoleID}}selected{{end}}>
+                        {{.Name}}
+                    </option>
+                {{end}}
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+            <a href="/login" class="btn btn-secondary">Cancelar</a>
+        </div>
+
+        <div class="form-footer">
+            <p>Já tem uma conta? <a href="/login">Faça login</a></p>
+        </div>
+    </form>
+</div>
+{{end}}

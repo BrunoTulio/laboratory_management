@@ -1,0 +1,90 @@
+{{define "content"}}
+<div class="agenda-page">
+    <div class="page-header">
+        <h1>Agenda</h1>
+    </div>
+
+    <div class="agenda-controls">
+        <div class="agenda-view-selector">
+            <button type="button" class="view-btn active" data-view="day">Dia</button>
+            <button type="button" class="view-btn" data-view="week">Semana</button>
+            <button type="button" class="view-btn" data-view="month">Mês</button>
+        </div>
+
+        <div class="agenda-navigation">
+            <button type="button" class="nav-btn" id="prev_period">← Anterior</button>
+            <span class="current-period" id="current_period">{{.CurrentDate.Format "January 2006"}}</span>
+            <button type="button" class="nav-btn" id="next_period">Próximo →</button>
+        </div>
+
+        <div class="agenda-filters">
+            <div class="filter-group">
+                <label for="laboratory_filter" class="filter-label">Laboratório:</label>
+                <select id="laboratory_filter" name="laboratory_id" class="filter-select">
+                    <option value="">Todos</option>
+                    {{range .Laboratories}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="status_filter" class="filter-label">Status:</label>
+                <select id="status_filter" name="status" class="filter-select">
+                    <option value="">Todos</option>
+                    <option value="APPROVED">Aprovado</option>
+                    <option value="PENDING">Pendente</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="agenda-view" id="agenda_view">
+        <div class="day-view">
+            <div class="day-schedule">
+                <h2>{{.CurrentDate.Format "02/01/2006"}}</h2>
+                {{if .DayBookings}}
+                    <div class="time-slots">
+                        {{range .DayBookings}}
+                            <div class="time-slot booking-slot">
+                                <div class="slot-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</div>
+                                <div class="slot-content">
+                                    <h4>{{.Laboratory.Name}}</h4>
+                                    <p>{{.User.Name}}</p>
+                                    {{if .Class}}
+                                        <p>{{.Class.Name}}</p>
+                                    {{end}}
+                                    <p>{{.Reason}}</p>
+                                    <span class="status-badge status-{{.Status | lower}}">{{.Status}}</span>
+                                </div>
+                            </div>
+                        {{end}}
+                    </div>
+                {{else}}
+                    <div class="empty-state">
+                        <p>Nenhum agendamento para este dia.</p>
+                    </div>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="week-view" style="display: none;">
+            <div class="week-grid">
+                <!-- Week view structure - to be implemented by students -->
+                <div class="empty-state">
+                    <p>Visualização semanal - a ser implementada pelos alunos.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="month-view" style="display: none;">
+            <div class="month-grid">
+                <!-- Month view structure - to be implemented by students -->
+                <div class="empty-state">
+                    <p>Visualização mensal - a ser implementada pelos alunos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,92 @@
+{{define "content"}}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Bem-vindo, {{.User.Name}}!</p>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <h3>Próximos Agendamentos</h3>
+                <p class="stat-number">{{.Stats.UpcomingBookings}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+                <h3>Solicitações Pendentes</h3>
+                <p class="stat-number">{{.Stats.PendingBookings}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🔔</div>
+            <div class="stat-content">
+                <h3>Notificações</h3>
+                <p class="stat-number">{{.Stats.UnreadNotifications}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <h3>Total de Agendamentos</h3>
+                <p class="stat-number">{{.Stats.TotalBookings}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="dashboard-section">
+            <h2>Próximos Agendamentos</h2>
+            {{if .UpcomingBookings}}
+                <div class="booking-list">
+                    {{range .UpcomingBookings}}
+                        <div class="booking-card">
+                            <div class="booking-info">
+                                <h3>{{.Laboratory.Name}}</h3>
+                                <p class="booking-date">{{.BookingDate.Format "02/01/2006"}}</p>
+                                <p class="booking-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</p>
+                                <p class="booking-reason">{{.Reason}}</p>
+                            </div>
+                            <div class="booking-status status-{{.Status | lower}}">
+                                {{.Status}}
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="empty-state">
+                    <p>Nenhum agendamento próximo encontrado.</p>
+                    <a href="/agendamentos/novo" class="btn btn-primary">Criar Agendamento</a>
+                </div>
+            {{end}}
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Ações Rápidas</h2>
+            <div class="quick-actions">
+                <a href="/agendamentos/novo" class="action-card">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Novo Agendamento</span>
+                </a>
+                <a href="/disponibilidade" class="action-card">
+                    <span class="action-icon">🔍</span>
+                    <span class="action-text">Ver Disponibilidade</span>
+                </a>
+                <a href="/agenda" class="action-card">
+                    <span class="action-icon">📆</span>
+                    <span class="action-text">Ver Agenda</span>
+                </a>
+                <a href="/historico" class="action-card">
+                    <span class="action-icon">📜</span>
+                    <span class="action-text">Ver Histórico</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

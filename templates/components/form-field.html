@@ -1,0 +1,102 @@
+{{define "form-field"}}
+<div class="form-field {{if .Error}}has-error{{end}}">
+    {{if .Label}}
+        <label for="{{.ID}}" class="form-label">{{.Label}}</label>
+    {{end}}
+    
+    {{if eq .Type "text"}}
+        <input 
+            type="text" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            value="{{.Value}}"
+            {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+            {{if .Required}}required{{end}}
+            {{if .ReadOnly}}readonly{{end}}
+        >
+    {{else if eq .Type "email"}}
+        <input 
+            type="email" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            value="{{.Value}}"
+            {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+            {{if .Required}}required{{end}}
+        >
+    {{else if eq .Type "password"}}
+        <input 
+            type="password" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+            {{if .Required}}required{{end}}
+        >
+    {{else if eq .Type "number"}}
+        <input 
+            type="number" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            value="{{.Value}}"
+            {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+            {{if .Required}}required{{end}}
+            {{if .Min}}min="{{.Min}}"{{end}}
+            {{if .Max}}max="{{.Max}}"{{end}}
+        >
+    {{else if eq .Type "date"}}
+        <input 
+            type="date" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            value="{{.Value}}"
+            {{if .Required}}required{{end}}
+        >
+    {{else if eq .Type "time"}}
+        <input 
+            type="time" 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-input" 
+            value="{{.Value}}"
+            {{if .Required}}required{{end}}
+        >
+    {{else if eq .Type "select"}}
+        <select 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-select"
+            {{if .Required}}required{{end}}
+        >
+            {{if .Placeholder}}
+                <option value="">{{.Placeholder}}</option>
+            {{end}}
+            {{range .Options}}
+                <option value="{{.Value}}" {{if eq .Value $.Value}}selected{{end}}>
+                    {{.Label}}
+                </option>
+            {{end}}
+        </select>
+    {{else if eq .Type "textarea"}}
+        <textarea 
+            id="{{.ID}}" 
+            name="{{.Name}}" 
+            class="form-textarea" 
+            rows="{{.Rows}}"
+            {{if .Placeholder}}placeholder="{{.Placeholder}}"{{end}}
+            {{if .Required}}required{{end}}
+        >{{.Value}}</textarea>
+    {{end}}
+
+    {{if .Error}}
+        <span class="form-error">{{.Error}}</span>
+    {{end}}
+    
+    {{if .Help}}
+        <span class="form-help">{{.Help}}</span>
+    {{end}}
+</div>
+{{end}}

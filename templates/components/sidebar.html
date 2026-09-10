@@ -1,0 +1,84 @@
+{{define "sidebar"}}
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>Menu</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a href="/dashboard" class="sidebar-link {{if eq .CurrentPage "dashboard"}}active{{end}}">
+                    <span class="sidebar-icon">📊</span>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/agendamentos" class="sidebar-link {{if eq .CurrentPage "agendamentos"}}active{{end}}">
+                    <span class="sidebar-icon">📅</span>
+                    <span class="sidebar-text">Meus Agendamentos</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/agendamentos/novo" class="sidebar-link {{if eq .CurrentPage "novo-agendamento"}}active{{end}}">
+                    <span class="sidebar-icon">➕</span>
+                    <span class="sidebar-text">Novo Agendamento</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/disponibilidade" class="sidebar-link {{if eq .CurrentPage "disponibilidade"}}active{{end}}">
+                    <span class="sidebar-icon">🔍</span>
+                    <span class="sidebar-text">Disponibilidade</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/agenda" class="sidebar-link {{if eq .CurrentPage "agenda"}}active{{end}}">
+                    <span class="sidebar-icon">📆</span>
+                    <span class="sidebar-text">Agenda</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/historico" class="sidebar-link {{if eq .CurrentPage "historico"}}active{{end}}">
+                    <span class="sidebar-icon">📜</span>
+                    <span class="sidebar-text">Histórico</span>
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a href="/notificacoes" class="sidebar-link {{if eq .CurrentPage "notificacoes"}}active{{end}}">
+                    <span class="sidebar-icon">🔔</span>
+                    <span class="sidebar-text">Notificações</span>
+                    {{if .UnreadCount}}
+                        <span class="sidebar-badge">{{.UnreadCount}}</span>
+                    {{end}}
+                </a>
+            </li>
+            {{if eq .UserRole "DIRECAO"}}
+                <li class="sidebar-divider"></li>
+                <li class="sidebar-item">
+                    <a href="/admin" class="sidebar-link {{if eq .CurrentPage "admin"}}active{{end}}">
+                        <span class="sidebar-icon">⚙️</span>
+                        <span class="sidebar-text">Administração</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/admin/usuarios" class="sidebar-link {{if eq .CurrentPage "admin-usuarios"}}active{{end}}">
+                        <span class="sidebar-icon">👥</span>
+                        <span class="sidebar-text">Usuários</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/admin/agendamentos" class="sidebar-link {{if eq .CurrentPage "admin-agendamentos"}}active{{end}}">
+                        <span class="sidebar-icon">📋</span>
+                        <span class="sidebar-text">Solicitações</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/admin/auditoria" class="sidebar-link {{if eq .CurrentPage "admin-auditoria"}}active{{end}}">
+                        <span class="sidebar-icon">📝</span>
+                        <span class="sidebar-text">Auditoria</span>
+                    </a>
+                </li>
+            {{end}}
+        </ul>
+    </nav>
+</aside>
+{{end}}

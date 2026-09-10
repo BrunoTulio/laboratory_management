@@ -1,0 +1,45 @@
+{{define "content"}}
+<div class="notifications-page">
+    <div class="page-header">
+        <h1>Notificações</h1>
+        {{if .UnreadCount}}
+            <button type="button" class="btn btn-secondary" id="mark_all_read">Marcar todas como lidas</button>
+        {{end}}
+    </div>
+
+    {{if .Notifications}}
+        <div class="notification-list">
+            {{range .Notifications}}
+                <div class="notification-item {{if not .IsRead}}unread{{end}}">
+                    <div class="notification-icon">
+                        {{if eq .Type "BOOKING_CREATED"}}📝{{end}}
+                        {{if eq .Type "BOOKING_APPROVED"}}✅{{end}}
+                        {{if eq .Type "BOOKING_REJECTED"}}❌{{end}}
+                        {{if eq .Type "BOOKING_CANCELLED"}}🚫{{end}}
+                        {{if eq .Type "BOOKING_REMINDER"}}⏰{{end}}
+                    </div>
+                    
+                    <div class="notification-content">
+                        <h3>{{.Title}}</h3>
+                        <p>{{.Message}}</p>
+                        <p class="notification-date">{{.CreatedAt.Format "02/01/2006 15:04"}}</p>
+                    </div>
+
+                    <div class="notification-actions">
+                        {{if .BookingID}}
+                            <a href="/agendamentos/{{.BookingID}}" class="btn btn-sm btn-outline">Ver Agendamento</a>
+                        {{end}}
+                        {{if not .IsRead}}
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="markAsRead({{.ID}})">Marcar como lida</button>
+                        {{end}}
+                    </div>
+                </div>
+            {{end}}
+        </div>
+    {{else}}
+        <div class="empty-state">
+            <p>Nenhuma notificação encontrada.</p>
+        </div>
+    {{end}}
+</div>
+{{end}}

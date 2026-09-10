@@ -1,0 +1,87 @@
+{{define "content"}}
+<div class="admin-users-page">
+    <div class="page-header">
+        <h1>Gerenciar Usuários</h1>
+        <button type="button" class="btn btn-primary" id="add_user">Adicionar Usuário</button>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label for="role_filter" class="filter-label">Perfil:</label>
+            <select id="role_filter" name="role" class="filter-select">
+                <option value="">Todos</option>
+                <option value="PROFESSOR" {{if eq .FilterRole "PROFESSOR"}}selected{{end}}>Professor</option>
+                <option value="ALUNO" {{if eq .FilterRole "ALUNO"}}selected{{end}}>Aluno</option>
+                <option value="DIRECAO" {{if eq .FilterRole "DIRECAO"}}selected{{end}}>Direção</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="status_filter" class="filter-label">Status:</label>
+            <select id="status_filter" name="status" class="filter-select">
+                <option value="">Todos</option>
+                <option value="ACTIVE" {{if eq .FilterStatus "ACTIVE"}}selected{{end}}>Ativo</option>
+                <option value="INACTIVE" {{if eq .FilterStatus "INACTIVE"}}selected{{end}}>Inativo</option>
+                <option value="BLOCKED" {{if eq .FilterStatus "BLOCKED"}}selected{{end}}>Bloqueado</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="search_filter" class="filter-label">Buscar:</label>
+            <input type="text" id="search_filter" name="search" class="filter-input" placeholder="Nome ou e-mail" value="{{.FilterSearch}}">
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="apply_filters">Filtrar</button>
+        <button type="button" class="btn btn-outline" id="clear_filters">Limpar</button>
+    </div>
+
+    {{if .Users}}
+        <div class="users-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Perfil</th>
+                        <th>Matrícula</th>
+                        <th>Telefone</th>
+                        <th>Status</th>
+                        <th>Data de Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Users}}
+                        <tr>
+                            <td>{{.Name}}</td>
+                            <td>{{.Email}}</td>
+                            <td>{{.Role.Name}}</td>
+                            <td>{{.RegistrationNumber}}</td>
+                            <td>{{.Phone}}</td>
+                            <td>
+                                <span class="status-badge status-{{.Status | lower}}">
+                                    {{.Status}}
+                                </span>
+                            </td>
+                            <td>{{.CreatedAt.Format "02/01/2006"}}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="viewUser({{.ID}})">Ver</button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="editUser({{.ID}})">Editar</button>
+                                {{if eq .Status "ACTIVE"}}
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="deactivateUser({{.ID}})">Desativar</button>
+                                {{else}}
+                                    <button type="button" class="btn btn-sm btn-success" onclick="activateUser({{.ID}})">Ativar</button>
+                                {{end}}
+                            </td>
+                        </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    {{else}}
+        <div class="empty-state">
+            <p>Nenhum usuário encontrado.</p>
+        </div>
+    {{end}}
+</div>
+{{end}}

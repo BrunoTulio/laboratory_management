@@ -1,0 +1,82 @@
+{{define "content"}}
+<div class="admin-audit-page">
+    <div class="page-header">
+        <h1>Auditoria do Sistema</h1>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label for="action_filter" class="filter-label">Ação:</label>
+            <select id="action_filter" name="action" class="filter-select">
+                <option value="">Todas</option>
+                <option value="LOGIN" {{if eq .FilterAction "LOGIN"}}selected{{end}}>Login</option>
+                <option value="CREATE_USER" {{if eq .FilterAction "CREATE_USER"}}selected{{end}}>Criar Usuário</option>
+                <option value="UPDATE_USER" {{if eq .FilterAction "UPDATE_USER"}}selected{{end}}>Atualizar Usuário</option>
+                <option value="CREATE_BOOKING" {{if eq .FilterAction "CREATE_BOOKING"}}selected{{end}}>Criar Agendamento</option>
+                <option value="APPROVE_BOOKING" {{if eq .FilterAction "APPROVE_BOOKING"}}selected{{end}}>Aprovar Agendamento</option>
+                <option value="REJECT_BOOKING" {{if eq .FilterAction "REJECT_BOOKING"}}selected{{end}}>Rejeitar Agendamento</option>
+                <option value="CANCEL_BOOKING" {{if eq .FilterAction "CANCEL_BOOKING"}}selected{{end}}>Cancelar Agendamento</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="entity_filter" class="filter-label">Entidade:</label>
+            <select id="entity_filter" name="entity" class="filter-select">
+                <option value="">Todas</option>
+                <option value="USER" {{if eq .FilterEntity "USER"}}selected{{end}}>Usuário</option>
+                <option value="BOOKING" {{if eq .FilterEntity "BOOKING"}}selected{{end}}>Agendamento</option>
+                <option value="LABORATORY" {{if eq .FilterEntity "LABORATORY"}}selected{{end}}>Laboratório</option>
+                <option value="CLASS" {{if eq .FilterEntity "CLASS"}}selected{{end}}>Turma</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="date_from" class="filter-label">De:</label>
+            <input type="date" id="date_from" name="date_from" class="filter-input" value="{{.FilterDateFrom}}">
+        </div>
+
+        <div class="filter-group">
+            <label for="date_to" class="filter-label">Até:</label>
+            <input type="date" id="date_to" name="date_to" class="filter-input" value="{{.FilterDateTo}}">
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="apply_filters">Filtrar</button>
+        <button type="button" class="btn btn-outline" id="clear_filters">Limpar</button>
+    </div>
+
+    {{if .AuditLogs}}
+        <div class="audit-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Usuário</th>
+                        <th>Ação</th>
+                        <th>Entidade</th>
+                        <th>ID da Entidade</th>
+                        <th>Detalhes</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .AuditLogs}}
+                        <tr>
+                            <td>{{.CreatedAt.Format "02/01/2006 15:04"}}</td>
+                            <td>{{if .UserID}}{{.UserID}}{{else}}-{{end}}</td>
+                            <td>{{.Action}}</td>
+                            <td>{{.EntityType}}</td>
+                            <td>{{if .EntityID}}{{.EntityID}}{{else}}-{{end}}</td>
+                            <td>{{.Details}}</td>
+                            <td>{{.IPAddress}}</td>
+                        </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    {{else}}
+        <div class="empty-state">
+            <p>Nenhum registro de auditoria encontrado.</p>
+        </div>
+    {{end}}
+</div>
+{{end}}

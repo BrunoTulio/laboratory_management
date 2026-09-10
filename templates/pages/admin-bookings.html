@@ -1,0 +1,112 @@
+{{define "content"}}
+<div class="admin-bookings-page">
+    <div class="page-header">
+        <h1>Gerenciar Agendamentos</h1>
+    </div>
+
+    <div class="admin-tabs">
+        <button type="button" class="tab-btn active" data-tab="pending">Pendentes ({{.PendingCount}})</button>
+        <button type="button" class="tab-btn" data-tab="all">Todos</button>
+        <button type="button" class="tab-btn" data-tab="approved">Aprovados</button>
+        <button type="button" class="tab-btn" data-tab="rejected">Rejeitados</button>
+    </div>
+
+    <div class="tab-content active" id="pending-tab">
+        <div class="booking-section">
+            <h2>Solicitações Pendentes</h2>
+            {{if .PendingBookings}}
+                <div class="booking-list">
+                    {{range .PendingBookings}}
+                        <div class="booking-card admin-booking">
+                            <div class="booking-info">
+                                <h3>{{.Laboratory.Name}}</h3>
+                                <p class="booking-date">{{.BookingDate.Format "02/01/2006"}}</p>
+                                <p class="booking-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</p>
+                                <p class="booking-user">Solicitante: {{.User.Name}} ({{.User.Email}})</p>
+                                {{if .Class}}
+                                    <p class="booking-class">Turma: {{.Class.Name}}</p>
+                                {{end}}
+                                <p class="booking-reason">{{.Reason}}</p>
+                            </div>
+                            <div class="booking-actions">
+                                <a href="/agendamentos/{{.ID}}" class="btn btn-sm btn-outline">Ver Detalhes</a>
+                                <button type="button" class="btn btn-sm btn-success" onclick="approveBooking({{.ID}})">Aprovar</button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="rejectBooking({{.ID}})">Rejeitar</button>
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="empty-state">
+                    <p>Nenhuma solicitação pendente.</p>
+                </div>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="tab-content" id="all-tab">
+        <div class="booking-section">
+            <h2>Todos os Agendamentos</h2>
+            {{if .AllBookings}}
+                <div class="booking-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Laboratório</th>
+                                <th>Solicitante</th>
+                                <th>Turma</th>
+                                <th>Motivo</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .AllBookings}}
+                                <tr>
+                                    <td>{{.BookingDate.Format "02/01/2006"}}</td>
+                                    <td>{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</td>
+                                    <td>{{.Laboratory.Name}}</td>
+                                    <td>{{.User.Name}}</td>
+                                    <td>{{if .Class}}{{.Class.Name}}{{else}}-{{end}}</td>
+                                    <td>{{.Reason}}</td>
+                                    <td>
+                                        <span class="status-badge status-{{.Status | lower}}">
+                                            {{.Status}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/agendamentos/{{.ID}}" class="btn btn-sm btn-outline">Ver</a>
+                                        {{if eq .Status "APPROVED"}}
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="cancelBooking({{.ID}})">Cancelar</button>
+                                        {{end}}
+                                    </td>
+                                </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            {{else}}
+                <div class="empty-state">
+                    <p>Nenhum agendamento encontrado.</p>
+                </div>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="tab-content" id="approved-tab">
+        <div class="booking-section">
+            <h2>Agendamentos Aprovados</h2>
+            <!-- Similar structure for approved bookings -->
+        </div>
+    </div>
+
+    <div class="tab-content" id="rejected-tab">
+        <div class="booking-section">
+            <h2>Agendamentos Rejeitados</h2>
+            <!-- Similar structure for rejected bookings -->
+        </div>
+    </div>
+</div>
+{{end}}

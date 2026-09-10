@@ -1,0 +1,76 @@
+{{define "content"}}
+<div class="history-page">
+    <div class="page-header">
+        <h1>Histórico de Agendamentos</h1>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label for="date_from" class="filter-label">De:</label>
+            <input type="date" id="date_from" name="date_from" class="filter-input" value="{{.FilterDateFrom}}">
+        </div>
+
+        <div class="filter-group">
+            <label for="date_to" class="filter-label">Até:</label>
+            <input type="date" id="date_to" name="date_to" class="filter-input" value="{{.FilterDateTo}}">
+        </div>
+
+        <div class="filter-group">
+            <label for="status_filter" class="filter-label">Status:</label>
+            <select id="status_filter" name="status" class="filter-select">
+                <option value="">Todos</option>
+                <option value="APPROVED" {{if eq .FilterStatus "APPROVED"}}selected{{end}}>Aprovado</option>
+                <option value="REJECTED" {{if eq .FilterStatus "REJECTED"}}selected{{end}}>Rejeitado</option>
+                <option value="CANCELLED" {{if eq .FilterStatus "CANCELLED"}}selected{{end}}>Cancelado</option>
+                <option value="CONCLUIDO" {{if eq .FilterStatus "CONCLUIDO"}}selected{{end}}>Concluído</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="apply_filters">Filtrar</button>
+        <button type="button" class="btn btn-outline" id="clear_filters">Limpar</button>
+    </div>
+
+    {{if .Bookings}}
+        <div class="history-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Laboratório</th>
+                        <th>Turma</th>
+                        <th>Motivo</th>
+                        <th>Status</th>
+                        <th>Criado em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Bookings}}
+                        <tr>
+                            <td>{{.BookingDate.Format "02/01/2006"}}</td>
+                            <td>{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</td>
+                            <td>{{.Laboratory.Name}}</td>
+                            <td>{{if .Class}}{{.Class.Name}}{{else}}-{{end}}</td>
+                            <td>{{.Reason}}</td>
+                            <td>
+                                <span class="status-badge status-{{.Status | lower}}">
+                                    {{.Status}}
+                                </span>
+                            </td>
+                            <td>{{.CreatedAt.Format "02/01/2006"}}</td>
+                            <td>
+                                <a href="/agendamentos/{{.ID}}" class="btn btn-sm btn-outline">Ver Detalhes</a>
+                            </td>
+                        </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    {{else}}
+        <div class="empty-state">
+            <p>Nenhum agendamento encontrado no histórico.</p>
+        </div>
+    {{end}}
+</div>
+{{end}}

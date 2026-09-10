@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Sistema de Gestão de Laboratório</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    {{if .User}}
+        {{template "navbar" .}}
+    {{end}}
+
+    <main class="main-content">
+        {{if .FlashMessage}}
+            <div class="flash-message {{.FlashType}}">
+                {{.FlashMessage}}
+            </div>
+        {{end}}
+
+        {{template "content" .}}
+    </main>
+
+    {{if .User}}
+        {{template "footer" .}}
+    {{end}}
+
+    <script src="/static/js/main.js"></script>
+    {{block "scripts" .}}{{end}}
+</body>
+</html>

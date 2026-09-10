@@ -1,0 +1,165 @@
+{{define "content"}}
+<div class="booking-detail-page">
+    <div class="page-header">
+        <h1>Detalhes do Agendamento</h1>
+        <a href="/agendamentos" class="btn btn-secondary">Voltar</a>
+    </div>
+
+    <div class="booking-detail">
+        <div class="detail-section">
+            <h2>Informações do Agendamento</h2>
+            
+            <div class="detail-row">
+                <span class="detail-label">Laboratório:</span>
+                <span class="detail-value">{{.Booking.Laboratory.Name}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Data:</span>
+                <span class="detail-value">{{.Booking.BookingDate.Format "02/01/2006"}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Horário:</span>
+                <span class="detail-value">{{.Booking.StartTime.Format "15:04"}} - {{.Booking.EndTime.Format "15:04"}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Turno:</span>
+                <span class="detail-value">{{.Booking.Shift}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Turma:</span>
+                <span class="detail-value">{{if .Booking.Class}}{{.Booking.Class.Name}}{{else}}-{{end}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Motivo:</span>
+                <span class="detail-value">{{.Booking.Reason}}</span>
+            </div>
+
+            {{if .Booking.Observation}}
+                <div class="detail-row">
+                    <span class="detail-label">Observação:</span>
+                    <span class="detail-value">{{.Booking.Observation}}</span>
+                </div>
+            {{end}}
+
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value">
+                    <span class="status-badge status-{{.Booking.Status | lower}}">
+                        {{.Booking.Status}}
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h2>Solicitante</h2>
+            
+            <div class="detail-row">
+                <span class="detail-label">Nome:</span>
+                <span class="detail-value">{{.Booking.User.Name}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">E-mail:</span>
+                <span class="detail-value">{{.Booking.User.Email}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Matrícula:</span>
+                <span class="detail-value">{{.Booking.User.RegistrationNumber}}</span>
+            </div>
+        </div>
+
+        {{if .Booking.ApprovedAt}}
+            <div class="detail-section">
+                <h2>Aprovação</h2>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Aprovado por:</span>
+                    <span class="detail-value">{{.Booking.ApprovedBy}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Data da aprovação:</span>
+                    <span class="detail-value">{{.Booking.ApprovedAt.Format "02/01/2006 15:04"}}</span>
+                </div>
+            </div>
+        {{end}}
+
+        {{if .Booking.RejectedAt}}
+            <div class="detail-section">
+                <h2>Rejeição</h2>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Rejeitado por:</span>
+                    <span class="detail-value">{{.Booking.RejectedBy}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Data da rejeição:</span>
+                    <span class="detail-value">{{.Booking.RejectedAt.Format "02/01/2006 15:04"}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Motivo da rejeição:</span>
+                    <span class="detail-value">{{.Booking.RejectionReason}}</span>
+                </div>
+            </div>
+        {{end}}
+
+        {{if .Booking.CancelledAt}}
+            <div class="detail-section">
+                <h2>Cancelamento</h2>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Cancelado por:</span>
+                    <span class="detail-value">{{.Booking.CancelledBy}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Data do cancelamento:</span>
+                    <span class="detail-value">{{.Booking.CancelledAt.Format "02/01/2006 15:04"}}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Motivo do cancelamento:</span>
+                    <span class="detail-value">{{.Booking.CancellationReason}}</span>
+                </div>
+            </div>
+        {{end}}
+
+        <div class="detail-section">
+            <h2>Informações Gerais</h2>
+            
+            <div class="detail-row">
+                <span class="detail-label">Criado em:</span>
+                <span class="detail-value">{{.Booking.CreatedAt.Format "02/01/2006 15:04"}}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Atualizado em:</span>
+                <span class="detail-value">{{.Booking.UpdatedAt.Format "02/01/2006 15:04"}}</span>
+            </div>
+        </div>
+
+        <div class="detail-actions">
+            {{if eq .Booking.Status "PENDENTE"}}
+                {{if eq .UserRole "DIRECAO"}}
+                    <button type="button" class="btn btn-success" onclick="approveBooking({{.Booking.ID}})">Aprovar</button>
+                    <button type="button" class="btn btn-danger" onclick="rejectBooking({{.Booking.ID}})">Rejeitar</button>
+                {{end}}
+                <button type="button" class="btn btn-warning" onclick="cancelBooking({{.Booking.ID}})">Cancelar</button>
+            {{end}}
+
+            {{if eq .Booking.Status "APPROVED"}}
+                <button type="button" class="btn btn-warning" onclick="cancelBooking({{.Booking.ID}})">Cancelar</button>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

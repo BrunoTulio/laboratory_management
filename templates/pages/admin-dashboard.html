@@ -1,0 +1,94 @@
+{{define "content"}}
+<div class="admin-dashboard">
+    <div class="page-header">
+        <h1>Dashboard Administrativo</h1>
+        <p>Bem-vindo, {{.User.Name}}!</p>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>Total de Usuários</h3>
+                <p class="stat-number">{{.Stats.TotalUsers}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-content">
+                <h3>Solicitações Pendentes</h3>
+                <p class="stat-number">{{.Stats.PendingBookings}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3>Agendamentos Aprovados</h3>
+                <p class="stat-number">{{.Stats.ApprovedBookings}}</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <h3>Próximos Usos</h3>
+                <p class="stat-number">{{.Stats.UpcomingBookings}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="dashboard-section">
+            <h2>Solicitações Pendentes</h2>
+            {{if .PendingBookings}}
+                <div class="booking-list">
+                    {{range .PendingBookings}}
+                        <div class="booking-card admin-booking">
+                            <div class="booking-info">
+                                <h3>{{.Laboratory.Name}}</h3>
+                                <p class="booking-date">{{.BookingDate.Format "02/01/2006"}}</p>
+                                <p class="booking-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</p>
+                                <p class="booking-user">Solicitante: {{.User.Name}}</p>
+                                <p class="booking-reason">{{.Reason}}</p>
+                            </div>
+                            <div class="booking-actions">
+                                <a href="/agendamentos/{{.ID}}" class="btn btn-sm btn-outline">Ver Detalhes</a>
+                                <button type="button" class="btn btn-sm btn-success" onclick="approveBooking({{.ID}})">Aprovar</button>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="rejectBooking({{.ID}})">Rejeitar</button>
+                            </div>
+                        </div>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="empty-state">
+                    <p>Nenhuma solicitação pendente.</p>
+                </div>
+            {{end}}
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Ações Administrativas</h2>
+            <div class="admin-actions">
+                <a href="/admin/usuarios" class="action-card">
+                    <span class="action-icon">👥</span>
+                    <span class="action-text">Gerenciar Usuários</span>
+                </a>
+                <a href="/admin/agendamentos" class="action-card">
+                    <span class="action-icon">📋</span>
+                    <span class="action-text">Gerenciar Agendamentos</span>
+                </a>
+                <a href="/admin/historico" class="action-card">
+                    <span class="action-icon">📜</span>
+                    <span class="action-text">Histórico Completo</span>
+                </a>
+                <a href="/admin/auditoria" class="action-card">
+                    <span class="action-icon">📝</span>
+                    <span class="action-text">Auditoria</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

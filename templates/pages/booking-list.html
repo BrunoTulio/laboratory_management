@@ -1,0 +1,75 @@
+{{define "content"}}
+<div class="booking-list-page">
+    <div class="page-header">
+        <h1>Meus Agendamentos</h1>
+        <a href="/agendamentos/novo" class="btn btn-primary">Novo Agendamento</a>
+    </div>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label for="status_filter" class="filter-label">Status:</label>
+            <select id="status_filter" name="status" class="filter-select">
+                <option value="">Todos</option>
+                <option value="PENDENTE" {{if eq .FilterStatus "PENDENTE"}}selected{{end}}>Pendente</option>
+                <option value="APROVADO" {{if eq .FilterStatus "APROVADO"}}selected{{end}}>Aprovado</option>
+                <option value="REJEITADO" {{if eq .FilterStatus "REJEITADO"}}selected{{end}}>Rejeitado</option>
+                <option value="CANCELADO" {{if eq .FilterStatus "CANCELADO"}}selected{{end}}>Cancelado</option>
+                <option value="CONCLUIDO" {{if eq .FilterStatus "CONCLUIDO"}}selected{{end}}>Concluído</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="date_filter" class="filter-label">Data:</label>
+            <input type="date" id="date_filter" name="date" class="filter-input" value="{{.FilterDate}}">
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="apply_filters">Filtrar</button>
+        <button type="button" class="btn btn-outline" id="clear_filters">Limpar</button>
+    </div>
+
+    {{if .Bookings}}
+        <div class="booking-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Laboratório</th>
+                        <th>Turma</th>
+                        <th>Motivo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Bookings}}
+                        <tr>
+                            <td>{{.BookingDate.Format "02/01/2006"}}</td>
+                            <td>{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</td>
+                            <td>{{.Laboratory.Name}}</td>
+                            <td>{{if .Class}}{{.Class.Name}}{{else}}-{{end}}</td>
+                            <td>{{.Reason}}</td>
+                            <td>
+                                <span class="status-badge status-{{.Status | lower}}">
+                                    {{.Status}}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/agendamentos/{{.ID}}" class="btn btn-sm btn-outline">Ver Detalhes</a>
+                                {{if or (eq .Status "PENDENTE") (eq .Status "APROVADO")}}
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="cancelBooking({{.ID}})">Cancelar</button>
+                                {{end}}
+                            </td>
+                        </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    {{else}}
+        <div class="empty-state">
+            <p>Nenhum agendamento encontrado.</p>
+            <a href="/agendamentos/novo" class="btn btn-primary">Criar Agendamento</a>
+        </div>
+    {{end}}
+</div>
+{{end}}
