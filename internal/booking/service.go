@@ -43,6 +43,16 @@ func (s *Service) GetPendingBookings() ([]*Booking, error) {
 	return s.bookingRepo.GetPending()
 }
 
+// GetBookingsByDate retrieves active bookings for a specific date.
+func (s *Service) GetBookingsByDate(date time.Time) ([]*Booking, error) {
+	return s.bookingRepo.GetByDate(date)
+}
+
+// GetUpcomingBookings retrieves upcoming active bookings starting from fromDate.
+func (s *Service) GetUpcomingBookings(fromDate time.Time, limit int) ([]*Booking, error) {
+	return s.bookingRepo.GetUpcoming(fromDate, limit)
+}
+
 // CreateBooking creates a new booking with conflict detection
 func (s *Service) CreateBooking(req *CreateBookingRequest, userID int) (*Booking, error) {
 	// Validate input
@@ -86,6 +96,9 @@ func (s *Service) CreateBooking(req *CreateBookingRequest, userID int) (*Booking
 		StartTime:    req.StartTime,
 		EndTime:      req.EndTime,
 		Shift:        req.Shift,
+		TeacherName:  req.TeacherName,
+		ClassName:    req.ClassName,
+		SubjectName:  req.SubjectName,
 		Reason:       req.Reason,
 		Observation:  req.Observation,
 		Status:       StatusPending,

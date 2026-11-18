@@ -1,90 +1,140 @@
 {{define "content"}}
-<div class="agenda-page">
-    <div class="page-header">
-        <h1>Agenda</h1>
+<section class="agenda-page">
+    <div class="page-hero">
+        <div>
+            <p class="page-eyebrow">COORDENAÇÃO E PROFESSORES</p>
+            <h1 class="page-title">Agenda do laboratório</h1>
+            <p class="page-subtitle">Consulte todas as reservas e encontre períodos disponíveis.</p>
+        </div>
+        <div class="view-toggle" role="group" aria-label="Modo de visualização">
+            <a href="/agenda/dia?date={{.CurrentDateISO}}&shift={{.FilterShift}}&teacher={{.FilterTeacher}}&class_id={{.FilterClass}}&subject={{.FilterSubject}}" class="view-toggle-btn {{if ne .ViewMode "week"}}active{{end}}">Dia</a>
+            <a href="/agenda/semana?date={{.CurrentDateISO}}&shift={{.FilterShift}}&teacher={{.FilterTeacher}}&class_id={{.FilterClass}}&subject={{.FilterSubject}}" class="view-toggle-btn {{if eq .ViewMode "week"}}active{{end}}">Semana</a>
+        </div>
     </div>
 
-    <div class="agenda-controls">
-        <div class="agenda-view-selector">
-            <button type="button" class="view-btn active" data-view="day">Dia</button>
-            <button type="button" class="view-btn" data-view="week">Semana</button>
-            <button type="button" class="view-btn" data-view="month">Mês</button>
+    <div class="card filters-card">
+        <div class="date-nav-row">
+            <div class="date-nav-controls">
+                <a href="{{if eq .ViewMode "week"}}/agenda/semana{{else}}/agenda{{end}}?date={{.PrevDateISO}}&shift={{.FilterShift}}&teacher={{.FilterTeacher}}&class_id={{.FilterClass}}&subject={{.FilterSubject}}" class="circle-nav-btn" aria-label="Período anterior">&lt;</a>
+                <span class="date-nav-label">{{.TodayFormatted}}</span>
+                <a href="{{if eq .ViewMode "week"}}/agenda/semana{{else}}/agenda{{end}}?date={{.NextDateISO}}&shift={{.FilterShift}}&teacher={{.FilterTeacher}}&class_id={{.FilterClass}}&subject={{.FilterSubject}}" class="circle-nav-btn" aria-label="Próximo período">&gt;</a>
+            </div>
+            <a href="{{if eq .ViewMode "week"}}/agenda/semana{{else}}/agenda{{end}}?date={{.TodayISO}}" class="btn btn-secondary">Ir para hoje</a>
         </div>
 
-        <div class="agenda-navigation">
-            <button type="button" class="nav-btn" id="prev_period">← Anterior</button>
-            <span class="current-period" id="current_period">{{.CurrentDate.Format "January 2006"}}</span>
-            <button type="button" class="nav-btn" id="next_period">Próximo →</button>
-        </div>
+        <form method="GET" action="{{if eq .ViewMode "week"}}/agenda/semana{{else}}/agenda{{end}}" class="filters-grid" style="{{if not .IsAdmin}}grid-template-columns: repeat(4, minmax(0, 1fr));{{end}}">
+            <div class="field-group">
+                <label for="filter_date" class="field-label">Data</label>
+                <input type="date" id="filter_date" name="date" class="field-input" value="{{.CurrentDateISO}}" onchange="this.form.submit()">
+            </div>
 
-        <div class="agenda-filters">
-            <div class="filter-group">
-                <label for="laboratory_filter" class="filter-label">Laboratório:</label>
-                <select id="laboratory_filter" name="laboratory_id" class="filter-select">
+            <div class="field-group">
+                <label for="filter_shift" class="field-label">Período</label>
+                <select id="filter_shift" name="shift" class="field-select" onchange="this.form.submit()">
                     <option value="">Todos</option>
-                    {{range .Laboratories}}
-                        <option value="{{.ID}}">{{.Name}}</option>
+                    <option value="MATUTINO" {{if eq .FilterShift "MATUTINO"}}selected{{end}}>Manhã</option>
+                    <option value="VESPERTINO" {{if eq .FilterShift "VESPERTINO"}}selected{{end}}>Tarde</option>
+                    <option value="NOTURNO" {{if eq .FilterShift "NOTURNO"}}selected{{end}}>Noite</option>
+                </select>
+            </div>
+
+            {{if .IsAdmin}}
+                <div class="field-group">
+                    <label for="filter_teacher" class="field-label">Professor</label>
+                    <select id="filter_teacher" name="teacher" class="field-select" onchange="this.form.submit()">
+                        <option value="">Todos</option>
+                        {{range .Teachers}}
+                            <option value="{{.Name}}" {{if eq $.FilterTeacher .Name}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+            {{end}}
+
+            <div class="field-group">
+                <label for="filter_class" class="field-label">Turma</label>
+                <select id="filter_class" name="class_id" class="field-select" onchange="this.form.submit()">
+                    <option value="">Todas</option>
+                    {{range .ClassOptions}}
+                        <option value="{{.}}" {{if eq $.FilterClass .}}selected{{end}}>{{.}}</option>
                     {{end}}
                 </select>
             </div>
 
-            <div class="filter-group">
-                <label for="status_filter" class="filter-label">Status:</label>
-                <select id="status_filter" name="status" class="filter-select">
-                    <option value="">Todos</option>
-                    <option value="APPROVED">Aprovado</option>
-                    <option value="PENDING">Pendente</option>
+            <div class="field-group">
+                <label for="filter_subject" class="field-label">Disciplina</label>
+                <select id="filter_subject" name="subject" class="field-select" onchange="this.form.submit()">
+                    <option value="">Todas</option>
+                    {{range .SubjectOptions}}
+                        <option value="{{.}}" {{if eq $.FilterSubject .}}selected{{end}}>{{.}}</option>
+                    {{end}}
                 </select>
             </div>
-        </div>
+        </form>
+
+        <a href="{{if eq .ViewMode "week"}}/agenda/semana{{else}}/agenda{{end}}" class="clear-filters-link">Limpar filtros</a>
     </div>
 
-    <div class="agenda-view" id="agenda_view">
-        <div class="day-view">
-            <div class="day-schedule">
-                <h2>{{.CurrentDate.Format "02/01/2006"}}</h2>
-                {{if .DayBookings}}
-                    <div class="time-slots">
-                        {{range .DayBookings}}
-                            <div class="time-slot booking-slot">
-                                <div class="slot-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</div>
-                                <div class="slot-content">
-                                    <h4>{{.Laboratory.Name}}</h4>
-                                    <p>{{.User.Name}}</p>
-                                    {{if .Class}}
-                                        <p>{{.Class.Name}}</p>
-                                    {{end}}
-                                    <p>{{.Reason}}</p>
-                                    <span class="status-badge status-{{.Status | lower}}">{{.Status}}</span>
+    {{if eq .ViewMode "week"}}
+        <div class="field-group" style="gap: 16px;">
+            {{range .WeekDays}}
+                <div class="card">
+                    <div class="date-nav-row" style="margin-bottom: 10px;">
+                        <p class="day-summary-date" style="margin-bottom: 0;">{{.DateFormatted}}</p>
+                        <span class="info-pill">{{.BookedCount}} reserva(s) · {{.FreeCount}} livre(s)</span>
+                    </div>
+                    <div class="shifts-grid">
+                        {{range $shift := .Summaries}}
+                            {{if $shift.ShowInFilter}}
+                                <div class="shift-column {{if eq $shift.Key "MATUTINO"}}shift-column--morning{{else if eq $shift.Key "VESPERTINO"}}shift-column--afternoon{{else}}shift-column--night{{end}}">
+                                    <h3 class="shift-column-title">{{$shift.Title}}</h3>
+                                    <p class="shift-column-meta">{{$shift.BookedCount}} reserva(s) · {{$shift.FreeCount}} horário(s) livre(s)</p>
+                                    <div class="slot-chips">
+                                        {{range $shift.Slots}}
+                                            {{if .Booked}}
+                                                <span class="slot-chip slot-chip--booked">{{.LessonLabel}} · {{.Label}}{{if .TeacherName}} · {{.TeacherName}}{{end}}</span>
+                                            {{else}}
+                                                <a href="/agendamentos/novo?date={{$.CurrentDateISO}}&shift={{$shift.Key}}&lesson={{.Number}}" class="slot-chip">{{.LessonLabel}} · {{.Label}}</a>
+                                            {{end}}
+                                        {{end}}
+                                    </div>
                                 </div>
-                            </div>
+                            {{end}}
                         {{end}}
                     </div>
-                {{else}}
-                    <div class="empty-state">
-                        <p>Nenhum agendamento para este dia.</p>
-                    </div>
+                </div>
+            {{end}}
+        </div>
+    {{else}}
+        <div class="card">
+            <p class="day-summary-date">{{.TodayFormatted}}</p>
+
+            <div class="shifts-grid">
+                {{range $shift := .ShiftSummaries}}
+                    {{if $shift.ShowInFilter}}
+                        <div class="shift-column {{if eq $shift.Key "MATUTINO"}}shift-column--morning{{else if eq $shift.Key "VESPERTINO"}}shift-column--afternoon{{else}}shift-column--night{{end}}">
+                            <h3 class="shift-column-title">{{$shift.Title}}</h3>
+                            <p class="shift-column-meta">{{$shift.BookedCount}} reserva(s) · {{$shift.FreeCount}} horário(s) livre(s)</p>
+                            {{if eq $shift.BookedCount 0}}
+                                <p class="shift-column-empty">Nenhuma reserva com estes filtros.</p>
+                            {{end}}
+                            <div class="slot-chips">
+                                {{range $shift.Slots}}
+                                    {{if .Booked}}
+                                        <span class="slot-chip slot-chip--booked" title="{{.TeacherName}} · {{.SubjectName}}">
+                                            {{.LessonLabel}} · {{.Label}}{{if .TeacherName}} · {{.TeacherName}}{{end}}
+                                        </span>
+                                    {{else}}
+                                        <a href="/agendamentos/novo?date={{$.CurrentDateISO}}&shift={{$shift.Key}}&lesson={{.Number}}" class="slot-chip">
+                                            {{.LessonLabel}} · {{.Label}}
+                                        </a>
+                                    {{end}}
+                                {{end}}
+                            </div>
+                        </div>
+                    {{end}}
                 {{end}}
             </div>
         </div>
-
-        <div class="week-view" style="display: none;">
-            <div class="week-grid">
-                <!-- Week view structure - to be implemented by students -->
-                <div class="empty-state">
-                    <p>Visualização semanal - a ser implementada pelos alunos.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="month-view" style="display: none;">
-            <div class="month-grid">
-                <!-- Month view structure - to be implemented by students -->
-                <div class="empty-state">
-                    <p>Visualização mensal - a ser implementada pelos alunos.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    {{end}}
+</section>
 {{end}}

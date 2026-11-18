@@ -1,6 +1,9 @@
 package user
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Role represents a user role in the system
 type Role struct {
@@ -22,13 +25,36 @@ type User struct {
 	RegistrationNumber string   `json:"registration_number"`
 	Phone             string    `json:"phone"`
 	Status            string    `json:"status"`
+	ClassesCSV        string    `json:"classes_csv,omitempty"`
+	SubjectsCSV       string    `json:"subjects_csv,omitempty"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+// ClassesList returns the user's configured classes as a trimmed slice.
+func (u *User) ClassesList() []string {
+	return splitCSV(u.ClassesCSV)
+}
+
+// SubjectsList returns the user's configured subjects as a trimmed slice.
+func (u *User) SubjectsList() []string {
+	return splitCSV(u.SubjectsCSV)
+}
+
+func splitCSV(raw string) []string {
+	var out []string
+	for _, part := range strings.Split(raw, ",") {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			out = append(out, trimmed)
+		}
+	}
+	return out
 }
 
 // UserStatus constants
 const (
 	StatusActive   = "ACTIVE"
+	StatusPending  = "PENDING"
 	StatusInactive = "INACTIVE"
 	StatusBlocked  = "BLOCKED"
 )

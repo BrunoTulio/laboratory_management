@@ -1,53 +1,38 @@
 {{define "navbar"}}
-<nav class="navbar">
-    <div class="navbar-container">
-        <div class="navbar-brand">
-            <a href="/dashboard">Sistema de Laboratório</a>
-        </div>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/dashboard" class="brand">
+            <span class="brand-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+            </span>
+            <span class="brand-text">
+                <span class="brand-kicker">CETEP · BACIA DO PARAMIRIM</span>
+                <span class="brand-subtitle">Laboratório de informática</span>
+            </span>
+        </a>
 
-        <div class="navbar-menu">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a href="/dashboard" class="nav-link">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/agendamentos" class="nav-link">Meus Agendamentos</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/agendamentos/novo" class="nav-link">Novo Agendamento</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/disponibilidade" class="nav-link">Disponibilidade</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/agenda" class="nav-link">Agenda</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/historico" class="nav-link">Histórico</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/notificacoes" class="nav-link">
-                        Notificações
-                        {{if .UnreadCount}}
-                            <span class="notification-badge">{{.UnreadCount}}</span>
-                        {{end}}
-                    </a>
-                </li>
-                {{if eq .UserRole "DIRECAO"}}
-                    <li class="nav-item">
-                        <a href="/admin" class="nav-link">Administração</a>
-                    </li>
-                {{end}}
-            </ul>
-        </div>
-
-        <div class="navbar-user">
-            <div class="user-menu">
-                <span class="user-name">{{.UserName}}</span>
-                <a href="/perfil" class="user-profile">Perfil</a>
-                <a href="/logout" class="user-logout">Sair</a>
-            </div>
+        <div class="topbar-actions">
+            <button type="button" id="theme_toggle_btn" class="btn btn-secondary" style="padding: 8px 12px;" onclick="toggleTheme()">🌙 Escuro</button>
+            {{if .User}}
+                <span class="brand-subtitle" style="margin-right: 4px;">{{.User.Name}}</span>
+                <a href="/logout" class="btn btn-secondary" style="padding: 8px 14px;">Sair</a>
+            {{end}}
+            <a href="/agendamentos/novo" class="btn btn-primary">+ Novo agendamento</a>
         </div>
     </div>
-</nav>
+</header>
+
+<div class="subnav-wrapper">
+    <nav class="subnav-tabs" aria-label="Navegação principal">
+        <a href="/dashboard" class="tab-link {{if eq .ActiveTab "painel"}}active{{end}}">Painel</a>
+        <a href="/agenda" class="tab-link {{if eq .ActiveTab "agenda"}}active{{end}}">Agenda</a>
+        {{if .IsAdmin}}
+            <a href="/cadastros" class="tab-link {{if eq .ActiveTab "cadastros"}}active{{end}}">Cadastros</a>
+        {{end}}
+    </nav>
+</div>
 {{end}}

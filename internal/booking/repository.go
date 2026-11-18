@@ -19,8 +19,8 @@ func NewRepository(db *sql.DB) *Repository {
 // Create creates a new booking
 func (r *Repository) Create(booking *Booking) error {
 	query := `
-		INSERT INTO bookings (user_id, laboratory_id, class_id, booking_date, start_time, end_time, shift, reason, observation, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO bookings (user_id, laboratory_id, class_id, booking_date, start_time, end_time, shift, teacher_name, class_name, subject_name, reason, observation, status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		RETURNING id, created_at, updated_at
 	`
 	
@@ -29,10 +29,13 @@ func (r *Repository) Create(booking *Booking) error {
 		booking.UserID,
 		booking.LaboratoryID,
 		booking.ClassID,
-		booking.BookingDate,
+		booking.BookingDate.Format("2006-01-02"),
 		booking.StartTime,
 		booking.EndTime,
 		booking.Shift,
+		booking.TeacherName,
+		booking.ClassName,
+		booking.SubjectName,
 		booking.Reason,
 		booking.Observation,
 		booking.Status,
@@ -53,7 +56,7 @@ func (r *Repository) GetByID(id int) (*Booking, error) {
 		       b.rejected_by, b.rejected_at, b.rejection_reason, b.cancelled_by, b.cancelled_at,
 		       b.cancellation_reason, b.created_at, b.updated_at
 		FROM bookings b
-		WHERE b.id = $1
+		WHERE b.id = ?
 	`
 	
 	booking := &Booking{}
@@ -99,7 +102,7 @@ func (r *Repository) GetByUserID(userID int) ([]*Booking, error) {
 		       b.rejected_by, b.rejected_at, b.rejection_reason, b.cancelled_by, b.cancelled_at,
 		       b.cancellation_reason, b.created_at, b.updated_at
 		FROM bookings b
-		WHERE b.user_id = $1
+		WHERE b.user_id = ?
 		ORDER BY b.booking_date DESC, b.start_time DESC
 	`
 	
@@ -155,11 +158,11 @@ func (r *Repository) GetByLaboratoryIDAndDate(laboratoryID int, date time.Time) 
 		       b.rejected_by, b.rejected_at, b.rejection_reason, b.cancelled_by, b.cancelled_at,
 		       b.cancellation_reason, b.created_at, b.updated_at
 		FROM bookings b
-		WHERE b.laboratory_id = $1 AND b.booking_date = $2 AND b.status IN ('APPROVED', 'PENDING')
+		WHERE b.laboratory_id = ? AND b.booking_date = ? AND b.status IN ('APPROVED', 'PENDING')
 		ORDER BY b.start_time
 	`
 	
-	rows, err := r.db.Query(query, laboratoryID, date)
+	rows, err := r.db.Query(query, laboratoryID, date.Format("2006-01-02"))
 	if err != nil {
 		return nil, fmt.Errorf("error getting bookings: %w", err)
 	}
@@ -264,30 +267,20 @@ func (r *Repository) CheckConflict(laboratoryID int, date time.Time, startTime, 
 	query := `
 		SELECT COUNT(*)
 		FROM bookings
-		WHERE laboratory_id = $1 
-		  AND booking_date = $2 
+		WHERE laboratory_id = ?
+		  AND booking_date = ?
 		  AND status IN ('APPROVED', 'PENDING')
-		  AND id != $3
-		  AND (
-			  (start_time < $4 AND end_time > $5) OR
-			  (start_time >= $4 AND start_time < $5) OR
-			  (end_time > $4 AND end_time <= $5)
-		  )
+		  AND (? = 0 OR id != ?)
+		  AND start_time < ?
+		  AND end_time > ?
 	`
-	
+
 	var count int
-	var excludeIDParam interface{}
-	if excludeID > 0 {
-		excludeIDParam = excludeID
-	} else {
-		excludeIDParam = nil
-	}
-	
-	err := r.db.QueryRow(query, laboratoryID, date, excludeIDParam, endTime, startTime).Scan(&count)
+	err := r.db.QueryRow(query, laboratoryID, date.Format("2006-01-02"), excludeID, excludeID, endTime, startTime).Scan(&count)
 	if err != nil {
 		return false, fmt.Errorf("error checking conflict: %w", err)
 	}
-	
+
 	return count > 0, nil
 }
 
@@ -295,8 +288,8 @@ func (r *Repository) CheckConflict(laboratoryID int, date time.Time, startTime, 
 func (r *Repository) Approve(bookingID, approvedBy int) error {
 	query := `
 		UPDATE bookings 
-		SET status = 'APPROVED', approved_by = $1, approved_at = NOW(), updated_at = NOW()
-		WHERE id = $2
+		SET status = 'APPROVED', approved_by = ?, approved_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
 	`
 	
 	result, err := r.db.Exec(query, approvedBy, bookingID)
@@ -320,8 +313,8 @@ func (r *Repository) Approve(bookingID, approvedBy int) error {
 func (r *Repository) Reject(bookingID, rejectedBy int, rejectionReason string) error {
 	query := `
 		UPDATE bookings 
-		SET status = 'REJECTED', rejected_by = $1, rejected_at = NOW(), rejection_reason = $2, updated_at = NOW()
-		WHERE id = $3
+		SET status = 'REJECTED', rejected_by = ?, rejected_at = CURRENT_TIMESTAMP, rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
 	`
 	
 	result, err := r.db.Exec(query, rejectedBy, rejectionReason, bookingID)
@@ -345,8 +338,8 @@ func (r *Repository) Reject(bookingID, rejectedBy int, rejectionReason string) e
 func (r *Repository) Cancel(bookingID, cancelledBy int, cancellationReason string) error {
 	query := `
 		UPDATE bookings 
-		SET status = 'CANCELLED', cancelled_by = $1, cancelled_at = NOW(), cancellation_reason = $2, updated_at = NOW()
-		WHERE id = $3
+		SET status = 'CANCELLED', cancelled_by = ?, cancelled_at = CURRENT_TIMESTAMP, cancellation_reason = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
 	`
 	
 	result, err := r.db.Exec(query, cancelledBy, cancellationReason, bookingID)
@@ -418,5 +411,58 @@ func (r *Repository) GetAll() ([]*Booking, error) {
 		bookings = append(bookings, booking)
 	}
 	
+	return bookings, nil
+}
+
+// GetByDate retrieves active (APPROVED/PENDING) bookings for a specific date with class, teacher, and subject metadata.
+func (r *Repository) GetByDate(date time.Time) ([]*Booking, error) {
+	query := `
+		SELECT b.id, b.user_id, b.laboratory_id, b.class_id, b.booking_date, b.start_time, b.end_time,
+		       COALESCE(b.shift, ''), COALESCE(b.teacher_name, ''), COALESCE(b.subject_name, ''),
+		       COALESCE(NULLIF(b.class_name, ''), COALESCE(c.name, '')), b.reason, COALESCE(b.observation, ''), b.status,
+		       b.created_at, b.updated_at
+		FROM bookings b
+		LEFT JOIN classes c ON b.class_id = c.id
+		WHERE b.booking_date = ? AND b.status IN ('APPROVED', 'PENDING')
+		ORDER BY b.start_time ASC
+	`
+	return r.scanSummaryRows(query, date.Format("2006-01-02"))
+}
+
+// GetUpcoming retrieves upcoming active bookings starting from fromDate.
+func (r *Repository) GetUpcoming(fromDate time.Time, limit int) ([]*Booking, error) {
+	query := `
+		SELECT b.id, b.user_id, b.laboratory_id, b.class_id, b.booking_date, b.start_time, b.end_time,
+		       COALESCE(b.shift, ''), COALESCE(b.teacher_name, ''), COALESCE(b.subject_name, ''),
+		       COALESCE(NULLIF(b.class_name, ''), COALESCE(c.name, '')), b.reason, COALESCE(b.observation, ''), b.status,
+		       b.created_at, b.updated_at
+		FROM bookings b
+		LEFT JOIN classes c ON b.class_id = c.id
+		WHERE b.booking_date >= ? AND b.status IN ('APPROVED', 'PENDING')
+		ORDER BY b.booking_date ASC, b.start_time ASC
+		LIMIT ?
+	`
+	return r.scanSummaryRows(query, fromDate.Format("2006-01-02"), limit)
+}
+
+func (r *Repository) scanSummaryRows(query string, args ...interface{}) ([]*Booking, error) {
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("error querying bookings: %w", err)
+	}
+	defer rows.Close()
+
+	var bookings []*Booking
+	for rows.Next() {
+		b := &Booking{}
+		if err := rows.Scan(
+			&b.ID, &b.UserID, &b.LaboratoryID, &b.ClassID, &b.BookingDate, &b.StartTime, &b.EndTime,
+			&b.Shift, &b.TeacherName, &b.SubjectName, &b.ClassName,
+			&b.Reason, &b.Observation, &b.Status, &b.CreatedAt, &b.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("error scanning booking summary: %w", err)
+		}
+		bookings = append(bookings, b)
+	}
 	return bookings, nil
 }

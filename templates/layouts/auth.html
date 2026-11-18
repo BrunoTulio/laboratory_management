@@ -3,32 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}} - Sistema de Gestão de Laboratório</title>
-    <link rel="stylesheet" href="/static/css/auth.css">
+    <title>{{.Title}} · CETEP Laboratório</title>
+    <script>
+        (function () {
+            var saved = localStorage.getItem('cetep_theme');
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+        function toggleTheme() {
+            var root = document.documentElement;
+            var isDark = root.getAttribute('data-theme') === 'dark';
+            var next = isDark ? 'light' : 'dark';
+            if (next === 'dark') {
+                root.setAttribute('data-theme', 'dark');
+            } else {
+                root.removeAttribute('data-theme');
+            }
+            localStorage.setItem('cetep_theme', next);
+            var btn = document.getElementById('theme_toggle_btn');
+            if (btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var btn = document.getElementById('theme_toggle_btn');
+            if (btn) {
+                var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                btn.textContent = isDark ? '☀️ Claro' : '🌙 Escuro';
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="/static/css/auth.css?v=2">
 </head>
 <body class="auth-page">
+    <button type="button" id="theme_toggle_btn" class="auth-theme-toggle" onclick="toggleTheme()">🌙 Escuro</button>
     <div class="auth-container">
-        <div class="auth-header">
-            <h1>Sistema de Gestão de Laboratório</h1>
-            <p>{{.Subtitle}}</p>
+        <div class="auth-brand">
+            <span class="auth-brand-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+            </span>
+            <span class="auth-brand-text">
+                <span class="auth-brand-kicker">CETEP · BACIA DO PARAMIRIM</span>
+                <span class="auth-brand-subtitle">Laboratório de informática</span>
+            </span>
         </div>
 
-        {{if .FlashMessage}}
-            <div class="flash-message {{.FlashType}}">
-                {{.FlashMessage}}
-            </div>
-        {{end}}
+        <div class="auth-card">
+            {{if .FlashMessage}}
+                <div class="flash-message {{.FlashType}}">
+                    {{.FlashMessage}}
+                </div>
+            {{end}}
 
-        <div class="auth-content">
             {{template "content" .}}
         </div>
 
         <div class="auth-footer">
-            <p>&copy; 2024 Sistema de Gestão de Laboratório</p>
+            <p>CETEP Bacia do Paramirim · Organização do laboratório de informática</p>
         </div>
     </div>
-
-    <script src="/static/js/auth.js"></script>
-    {{block "scripts" .}}{{end}}
 </body>
 </html>

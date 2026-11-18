@@ -19,7 +19,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Create(auditLog *AuditLog) error {
 	query := `
 		INSERT INTO audit_logs (user_id, action, entity_type, entity_id, details, ip_address, user_agent)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 		RETURNING id, created_at
 	`
 	
@@ -46,7 +46,7 @@ func (r *Repository) GetByID(id int) (*AuditLog, error) {
 	query := `
 		SELECT id, user_id, action, entity_type, entity_id, details, ip_address, user_agent, created_at
 		FROM audit_logs
-		WHERE id = $1
+		WHERE id = ?
 	`
 	
 	auditLog := &AuditLog{}
@@ -77,7 +77,7 @@ func (r *Repository) GetByUserID(userID int) ([]*AuditLog, error) {
 	query := `
 		SELECT id, user_id, action, entity_type, entity_id, details, ip_address, user_agent, created_at
 		FROM audit_logs
-		WHERE user_id = $1
+		WHERE user_id = ?
 		ORDER BY created_at DESC
 	`
 	
@@ -118,7 +118,7 @@ func (r *Repository) GetByAction(action string) ([]*AuditLog, error) {
 	query := `
 		SELECT id, user_id, action, entity_type, entity_id, details, ip_address, user_agent, created_at
 		FROM audit_logs
-		WHERE action = $1
+		WHERE action = ?
 		ORDER BY created_at DESC
 	`
 	
@@ -159,7 +159,7 @@ func (r *Repository) GetByEntity(entityType string, entityID int) ([]*AuditLog, 
 	query := `
 		SELECT id, user_id, action, entity_type, entity_id, details, ip_address, user_agent, created_at
 		FROM audit_logs
-		WHERE entity_type = $1 AND entity_id = $2
+		WHERE entity_type = ? AND entity_id = ?
 		ORDER BY created_at DESC
 	`
 	

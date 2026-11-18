@@ -1,0 +1,184 @@
+{{define "content"}}
+<section class="cadastros-page">
+    <div class="page-hero">
+        <div>
+            <p class="page-eyebrow">ADMINISTRAÇÃO</p>
+            <h1 class="page-title">Cadastros</h1>
+            <p class="page-subtitle">Cadastre turmas, disciplinas e convide usuários. Professores vinculam suas turmas e disciplinas ao ativar a conta.</p>
+        </div>
+    </div>
+
+    <div class="panel-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+        <div class="card">
+            <h2 class="card-title-serif">Turmas</h2>
+            <form method="POST" action="/cadastros" class="field-group">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <input type="hidden" name="type" value="class">
+                <label for="class_name" class="field-label">Identificação da turma</label>
+                <div class="inline-add-form">
+                    <input type="text" id="class_name" name="name" class="field-input" placeholder="Ex.: 2º ano · Informática" required>
+                    <button type="submit" class="btn btn-primary btn-icon-square" aria-label="Adicionar turma">+</button>
+                </div>
+            </form>
+
+            {{if .Classes}}
+                <ul class="cadastro-list">
+                    {{range $cls := .Classes}}
+                        <li class="cadastro-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                <form method="POST" action="/cadastros" class="inline-add-form" style="margin-bottom: 0; flex: 1;">
+                                    <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="type" value="class">
+                                    <input type="hidden" name="id" value="{{$cls.ID}}">
+                                    <input type="text" name="name" class="field-input" value="{{$cls.Name}}" required style="height: 34px;">
+                                    <button type="submit" class="clear-filters-link" title="Salvar">Salvar</button>
+                                </form>
+                                <form method="POST" action="/cadastros">
+                                    <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="type" value="class">
+                                    <input type="hidden" name="id" value="{{$cls.ID}}">
+                                    <button type="submit" class="clear-filters-link" title="Remover">Remover</button>
+                                </form>
+                            </div>
+
+                            {{if $.Subjects}}
+                                <form method="POST" action="/cadastros" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; border-top: 1px dashed #d5d8d0;">
+                                    <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                    <input type="hidden" name="type" value="class_subjects">
+                                    <input type="hidden" name="id" value="{{$cls.ID}}">
+                                    <span style="font-size: 0.78rem; color: #5c6862; font-weight: 600;">Disciplinas:</span>
+                                    {{range $.Subjects}}
+                                        <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer;">
+                                            <input type="checkbox" name="subject_ids" value="{{.ID}}" {{if index $cls.SubjectIDs .ID}}checked{{end}}>
+                                            <span>{{.Name}}</span>
+                                        </label>
+                                    {{end}}
+                                    <button type="submit" class="clear-filters-link" style="margin-left: auto;">Salvar vínculo</button>
+                                </form>
+                            {{end}}
+                        </li>
+                    {{end}}
+                </ul>
+            {{else}}
+                <p class="cadastro-empty">Nenhuma turma cadastrada ainda.</p>
+            {{end}}
+        </div>
+
+        <div class="card">
+            <h2 class="card-title-serif">Disciplinas</h2>
+            <form method="POST" action="/cadastros" class="field-group">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                <input type="hidden" name="type" value="subject">
+                <label for="subject_name" class="field-label">Nome da disciplina</label>
+                <div class="inline-add-form">
+                    <input type="text" id="subject_name" name="name" class="field-input" placeholder="Ex.: Programação" required>
+                    <button type="submit" class="btn btn-primary btn-icon-square" aria-label="Adicionar disciplina">+</button>
+                </div>
+            </form>
+
+            {{if .Subjects}}
+                <ul class="cadastro-list">
+                    {{range .Subjects}}
+                        <li class="cadastro-item">
+                            <form method="POST" action="/cadastros" class="inline-add-form" style="margin-bottom: 0; flex: 1;">
+                                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                <input type="hidden" name="action" value="update">
+                                <input type="hidden" name="type" value="subject">
+                                <input type="hidden" name="id" value="{{.ID}}">
+                                <input type="text" name="name" class="field-input" value="{{.Name}}" required style="height: 34px;">
+                                <button type="submit" class="clear-filters-link" title="Salvar">Salvar</button>
+                            </form>
+                            <form method="POST" action="/cadastros">
+                                <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="type" value="subject">
+                                <input type="hidden" name="id" value="{{.ID}}">
+                                <button type="submit" class="clear-filters-link" title="Remover">Remover</button>
+                            </form>
+                        </li>
+                    {{end}}
+                </ul>
+            {{else}}
+                <p class="cadastro-empty">Nenhuma disciplina cadastrada ainda.</p>
+            {{end}}
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title-serif">Usuários e convites</h2>
+        <form method="POST" action="/cadastros" class="filters-grid" style="grid-template-columns: 1.2fr 1.2fr 1fr auto; align-items: end; margin-bottom: 20px;">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <input type="hidden" name="type" value="user_invite">
+
+            <div class="field-group">
+                <label for="invite_name" class="field-label">Nome completo</label>
+                <input type="text" id="invite_name" name="name" class="field-input" placeholder="Ex.: Ana Souza" required>
+            </div>
+
+            <div class="field-group">
+                <label for="invite_email" class="field-label">E-mail</label>
+                <input type="email" id="invite_email" name="email" class="field-input" placeholder="ana@cetep.ba.gov.br" required>
+            </div>
+
+            <div class="field-group">
+                <label for="invite_role" class="field-label">Perfil</label>
+                <select id="invite_role" name="role" class="field-select">
+                    <option value="PROFESSOR">Professor</option>
+                    <option value="ALUNO">Aluno</option>
+                    <option value="DIRECAO">Direção</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="height: 40px;">Enviar convite</button>
+        </form>
+
+        <h3 class="card-title-serif" style="font-size: 1.08rem;">Usuários cadastrados</h3>
+        {{if .Users}}
+            <ul class="cadastro-list">
+                {{range .Users}}
+                    <li class="cadastro-item" style="flex-wrap: wrap;">
+                        <span>
+                            <strong>{{.Name}}</strong> · {{.Email}}
+                            {{if .Role}} ({{.Role.Name}}){{end}}
+                            {{if .ClassesCSV}} · Turmas: {{.ClassesCSV}}{{end}}
+                            {{if .SubjectsCSV}} · Disciplinas: {{.SubjectsCSV}}{{end}}
+                        </span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span class="info-pill">{{.Status}}</span>
+                            {{if ne .Email $.AdminEmail}}
+                                {{if eq .Status "ACTIVE"}}
+                                    <form method="POST" action="/cadastros">
+                                        <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                        <input type="hidden" name="type" value="user_status">
+                                        <input type="hidden" name="action" value="deactivate">
+                                        <input type="hidden" name="id" value="{{.ID}}">
+                                        <button type="submit" class="clear-filters-link">Inativar</button>
+                                    </form>
+                                {{else if eq .Status "INACTIVE"}}
+                                    <form method="POST" action="/cadastros">
+                                        <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                        <input type="hidden" name="type" value="user_status">
+                                        <input type="hidden" name="action" value="activate">
+                                        <input type="hidden" name="id" value="{{.ID}}">
+                                        <button type="submit" class="clear-filters-link">Reativar</button>
+                                    </form>
+                                {{end}}
+                                <form method="POST" action="/cadastros" onsubmit="return confirm('Excluir este usuário e todas as suas agendas?');">
+                                    <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                                    <input type="hidden" name="type" value="user_delete">
+                                    <input type="hidden" name="id" value="{{.ID}}">
+                                    <button type="submit" class="clear-filters-link" style="color: #b91c1c;">Excluir</button>
+                                </form>
+                            {{end}}
+                        </div>
+                    </li>
+                {{end}}
+            </ul>
+        {{else}}
+            <p class="cadastro-empty">Nenhum usuário cadastrado.</p>
+        {{end}}
+    </div>
+</section>
+{{end}}

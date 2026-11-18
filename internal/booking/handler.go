@@ -2,6 +2,7 @@ package booking
 
 import (
 	"encoding/json"
+	"laboratory-management/internal/middleware"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,7 +22,7 @@ func NewHandler(bookingService *Service) *Handler {
 
 // ListHandler handles listing user's bookings
 func (h *Handler) ListHandler(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserIDFromContext(r)
+	userID := middleware.GetUserIDFromContext(r)
 	if userID == 0 {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -53,8 +54,8 @@ func (h *Handler) DetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user has permission to view this booking
-	userID := GetUserIDFromContext(r)
-	userRole := GetUserRoleFromContext(r)
+	userID := middleware.GetUserIDFromContext(r)
+	userRole := middleware.GetUserRoleFromContext(r)
 	if booking.UserID != userID && userRole != "DIRECAO" {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
@@ -78,7 +79,7 @@ func (h *Handler) CreateHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userID := GetUserIDFromContext(r)
+		userID := middleware.GetUserIDFromContext(r)
 		booking, err := h.bookingService.CreateBooking(&req, userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -174,7 +175,7 @@ func (h *Handler) AdminApproveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	approverID := GetUserIDFromContext(r)
+	approverID := middleware.GetUserIDFromContext(r)
 	booking, err := h.bookingService.ApproveBooking(req.BookingID, approverID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -198,7 +199,7 @@ func (h *Handler) AdminRejectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rejecterID := GetUserIDFromContext(r)
+	rejecterID := middleware.GetUserIDFromContext(r)
 	booking, err := h.bookingService.RejectBooking(req.BookingID, rejecterID, req.RejectionReason)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -222,7 +223,7 @@ func (h *Handler) AdminCancelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cancellerID := GetUserIDFromContext(r)
+	cancellerID := middleware.GetUserIDFromContext(r)
 	booking, err := h.bookingService.CancelBooking(req.BookingID, cancellerID, req.CancellationReason)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -268,17 +269,4 @@ func (h *Handler) renderPendingBookingList(w http.ResponseWriter, r *http.Reques
 	// This will be implemented with HTML templates
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(bookings)
-}
-
-// Helper functions to replace middleware dependency
-func GetUserIDFromContext(r *http.Request) int {
-	// Placeholder implementation
-	// In production, this would extract from context
-	return 0
-}
-
-func GetUserRoleFromContext(r *http.Request) string {
-	// Placeholder implementation
-	// In production, this would extract from context
-	return ""
 }

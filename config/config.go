@@ -8,18 +8,37 @@ import (
 type Config struct {
 	AppEnv        string
 	AppPort       string
-	DatabaseURL   string
+	BaseURL       string
+	DatabasePath  string
 	SessionSecret string
 	CSRFSecret    string
+	AdminName     string
+	AdminEmail    string
+	AdminPassword string
+	SMTPHost      string
+	SMTPPort      string
+	SMTPUser      string
+	SMTPPassword  string
+	SMTPFrom      string
 }
 
 func Load() *Config {
+	port := getEnv("APP_PORT", "8080")
 	return &Config{
 		AppEnv:        getEnv("APP_ENV", "development"),
-		AppPort:       getEnv("APP_PORT", "8080"),
-		DatabaseURL:   getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/laboratory_management?sslmode=disable"),
+		AppPort:       port,
+		BaseURL:       getEnv("APP_BASE_URL", "http://localhost:"+port),
+		DatabasePath:  getEnv("DATABASE_PATH", "laboratory.db"),
 		SessionSecret: getEnv("SESSION_SECRET", "change-this-secret-key"),
 		CSRFSecret:    getEnv("CSRF_SECRET", "change-this-csrf-secret"),
+		AdminName:     getEnv("ADMIN_NAME", "Coordenação CETEP"),
+		AdminEmail:    getEnv("ADMIN_EMAIL", "admin@cetep.local"),
+		AdminPassword: getEnv("ADMIN_PASSWORD", "Admin@123"),
+		SMTPHost:      getEnv("SMTP_HOST", ""),
+		SMTPPort:      getEnv("SMTP_PORT", "587"),
+		SMTPUser:      getEnv("SMTP_USER", ""),
+		SMTPPassword:  getEnv("SMTP_PASSWORD", ""),
+		SMTPFrom:      getEnv("SMTP_FROM", "noreply@cetep.local"),
 	}
 }
 

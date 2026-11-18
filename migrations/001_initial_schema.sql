@@ -1,106 +1,106 @@
--- Initial schema for Laboratory Management System
+-- Initial SQLite schema for Laboratory Management System
 
--- Roles table
 CREATE TABLE IF NOT EXISTS roles (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
     role_id INTEGER REFERENCES roles(id),
-    registration_number VARCHAR(50),
-    phone VARCHAR(20),
-    status VARCHAR(20) DEFAULT 'ACTIVE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    registration_number TEXT DEFAULT '',
+    phone TEXT DEFAULT '',
+    status TEXT DEFAULT 'ACTIVE',
+    classes_csv TEXT DEFAULT '',
+    subjects_csv TEXT DEFAULT '',
+    activation_token TEXT DEFAULT '',
+    activation_expires_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Laboratories table
 CREATE TABLE IF NOT EXISTS laboratories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    location VARCHAR(255),
-    capacity INTEGER,
-    status VARCHAR(20) DEFAULT 'ACTIVE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    location TEXT DEFAULT '',
+    capacity INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'ACTIVE',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Classes table
 CREATE TABLE IF NOT EXISTS classes (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    course VARCHAR(255),
-    grade_year VARCHAR(50),
-    shift VARCHAR(20),
-    status VARCHAR(20) DEFAULT 'ACTIVE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    course TEXT DEFAULT '',
+    grade_year TEXT DEFAULT '',
+    shift TEXT DEFAULT '',
+    status TEXT DEFAULT 'ACTIVE',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Bookings table
 CREATE TABLE IF NOT EXISTS bookings (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) NOT NULL,
-    laboratory_id INTEGER REFERENCES laboratories(id) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    laboratory_id INTEGER NOT NULL REFERENCES laboratories(id),
     class_id INTEGER REFERENCES classes(id),
     booking_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    shift VARCHAR(20),
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    shift TEXT DEFAULT '',
+    teacher_name TEXT DEFAULT '',
+    class_name TEXT DEFAULT '',
+    subject_name TEXT DEFAULT '',
     reason TEXT NOT NULL,
-    observation TEXT,
-    status VARCHAR(20) DEFAULT 'PENDING',
+    observation TEXT DEFAULT '',
+    status TEXT DEFAULT 'PENDING',
     approved_by INTEGER REFERENCES users(id),
-    approved_at TIMESTAMP,
+    approved_at DATETIME,
     rejected_by INTEGER REFERENCES users(id),
-    rejected_at TIMESTAMP,
-    rejection_reason TEXT,
+    rejected_at DATETIME,
+    rejection_reason TEXT DEFAULT '',
     cancelled_by INTEGER REFERENCES users(id),
-    cancelled_at TIMESTAMP,
-    cancellation_reason TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    cancelled_at DATETIME,
+    cancellation_reason TEXT DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
     booking_id INTEGER REFERENCES bookings(id),
-    type VARCHAR(50) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
     message TEXT NOT NULL,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_read BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Audit logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER REFERENCES users(id),
-    action VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(50) NOT NULL,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
     entity_id INTEGER,
-    details TEXT,
-    ip_address VARCHAR(45),
-    user_agent TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    details TEXT DEFAULT '',
+    ip_address TEXT DEFAULT '',
+    user_agent TEXT DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+CREATE INDEX IF NOT EXISTS idx_users_activation_token ON users(activation_token);
 
 CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_laboratory ON bookings(laboratory_id);
@@ -116,14 +116,12 @@ CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs(entity_type, entity_id);
 
--- Insert default roles
-INSERT INTO roles (name, description) VALUES 
+INSERT INTO roles (name, description) VALUES
 ('PROFESSOR', 'Professor role with booking permissions'),
 ('ALUNO', 'Student role with limited booking permissions'),
 ('DIRECAO', 'Administration role with full permissions')
 ON CONFLICT (name) DO NOTHING;
 
--- Insert default laboratory
-INSERT INTO laboratories (name, description, location, capacity) VALUES 
-('Laboratório Principal', 'Laboratório de informática principal', 'Bloco A - Sala 101', 30)
-ON CONFLICT DO NOTHING;
+INSERT INTO laboratories (id, name, description, location, capacity) VALUES
+(1, 'Laboratório Principal', 'Laboratório de informática principal', 'Bloco A - Sala 101', 30)
+ON CONFLICT (id) DO NOTHING;

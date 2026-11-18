@@ -20,7 +20,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Create(lab *Laboratory) error {
 	query := `
 		INSERT INTO laboratories (name, description, location, capacity, status)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES (?, ?, ?, ?, ?)
 		RETURNING id, created_at, updated_at
 	`
 	
@@ -45,7 +45,7 @@ func (r *Repository) GetByID(id int) (*Laboratory, error) {
 	query := `
 		SELECT id, name, description, location, capacity, status, created_at, updated_at
 		FROM laboratories
-		WHERE id = $1
+		WHERE id = ?
 	`
 	
 	lab := &Laboratory{}
@@ -113,8 +113,8 @@ func (r *Repository) GetAll() ([]*Laboratory, error) {
 func (r *Repository) Update(lab *Laboratory) error {
 	query := `
 		UPDATE laboratories 
-		SET name = $1, description = $2, location = $3, capacity = $4, status = $5, updated_at = $6
-		WHERE id = $7
+		SET name = ?, description = ?, location = ?, capacity = ?, status = ?, updated_at = ?
+		WHERE id = ?
 	`
 	
 	lab.UpdatedAt = time.Now()
@@ -148,7 +148,7 @@ func (r *Repository) Update(lab *Laboratory) error {
 
 // Delete deletes a laboratory
 func (r *Repository) Delete(id int) error {
-	query := `DELETE FROM laboratories WHERE id = $1`
+	query := `DELETE FROM laboratories WHERE id = ?`
 	
 	result, err := r.db.Exec(query, id)
 	if err != nil {

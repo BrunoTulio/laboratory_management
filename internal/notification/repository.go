@@ -19,7 +19,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Create(notification *Notification) error {
 	query := `
 		INSERT INTO notifications (user_id, booking_id, type, title, message, is_read)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES (?, ?, ?, ?, ?, ?)
 		RETURNING id, created_at
 	`
 	
@@ -45,7 +45,7 @@ func (r *Repository) GetByID(id int) (*Notification, error) {
 	query := `
 		SELECT id, user_id, booking_id, type, title, message, is_read, created_at
 		FROM notifications
-		WHERE id = $1
+		WHERE id = ?
 	`
 	
 	notification := &Notification{}
@@ -75,7 +75,7 @@ func (r *Repository) GetByUserID(userID int) ([]*Notification, error) {
 	query := `
 		SELECT id, user_id, booking_id, type, title, message, is_read, created_at
 		FROM notifications
-		WHERE user_id = $1
+		WHERE user_id = ?
 		ORDER BY created_at DESC
 	`
 	
@@ -115,7 +115,7 @@ func (r *Repository) GetUnreadCount(userID int) (int, error) {
 	query := `
 		SELECT COUNT(*)
 		FROM notifications
-		WHERE user_id = $1 AND is_read = FALSE
+		WHERE user_id = ? AND is_read = FALSE
 	`
 	
 	var count int
@@ -129,7 +129,7 @@ func (r *Repository) GetUnreadCount(userID int) (int, error) {
 
 // MarkAsRead marks a notification as read
 func (r *Repository) MarkAsRead(notificationID int) error {
-	query := `UPDATE notifications SET is_read = TRUE WHERE id = $1`
+	query := `UPDATE notifications SET is_read = TRUE WHERE id = ?`
 	
 	result, err := r.db.Exec(query, notificationID)
 	if err != nil {
@@ -150,7 +150,7 @@ func (r *Repository) MarkAsRead(notificationID int) error {
 
 // MarkAllAsRead marks all notifications for a user as read
 func (r *Repository) MarkAllAsRead(userID int) error {
-	query := `UPDATE notifications SET is_read = TRUE WHERE user_id = $1`
+	query := `UPDATE notifications SET is_read = TRUE WHERE user_id = ?`
 	
 	_, err := r.db.Exec(query, userID)
 	if err != nil {
@@ -162,7 +162,7 @@ func (r *Repository) MarkAllAsRead(userID int) error {
 
 // Delete deletes a notification
 func (r *Repository) Delete(id int) error {
-	query := `DELETE FROM notifications WHERE id = $1`
+	query := `DELETE FROM notifications WHERE id = ?`
 	
 	result, err := r.db.Exec(query, id)
 	if err != nil {

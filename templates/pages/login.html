@@ -1,43 +1,42 @@
 {{define "content"}}
-<div class="login-form">
-    <h2>Login</h2>
-    <p>Entre com suas credenciais para acessar o sistema</p>
+<h1 class="auth-title">Entrar</h1>
+<p class="auth-subtitle">Acesse sua conta para consultar a agenda e gerenciar reservas.</p>
 
-    <form method="POST" action="/login" class="form">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+<form method="POST" action="/login" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-        <div class="form-field">
-            <label for="email" class="form-label">E-mail</label>
-            <input 
-                type="email" 
-                id="email" 
-                name="email" 
-                class="form-input" 
-                placeholder="seu@email.com"
-                required
-                value="{{.FormData.Email}}"
-            >
-        </div>
+    <div class="form-field">
+        <label for="email" class="form-label">E-mail</label>
+        <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="nome@cetep.ba.gov.br"
+            required
+            autocomplete="email"
+            value="{{.FormData.Email}}"
+        >
+    </div>
 
-        <div class="form-field">
-            <label for="password" class="form-label">Senha</label>
-            <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                class="form-input" 
-                placeholder="••••••••"
-                required
-            >
-        </div>
+    <div class="form-field">
+        <label for="password" class="form-label">Senha</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="Digite sua senha"
+            required
+            autocomplete="current-password"
+        >
+    </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Entrar</button>
-        </div>
+    <button type="submit" class="btn-auth-primary">Entrar</button>
+</form>
 
-        <div class="form-footer">
-            <p>Não tem uma conta? <a href="/cadastro">Cadastre-se</a></p>
-        </div>
-    </form>
-</div>
+<p class="auth-note">
+    Acesso restrito a usuários cadastrados pela coordenação.<br>
+    Recebeu um convite? Use o link enviado para o seu e-mail para definir sua senha.
+</p>
 {{end}}

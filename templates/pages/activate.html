@@ -1,0 +1,94 @@
+{{define "content"}}
+<h1 class="auth-title">Finalizar cadastro</h1>
+<p class="auth-subtitle">Defina uma senha para ativar seu acesso ao sistema do laboratório.</p>
+
+<form method="POST" action="/ativar-conta" class="auth-form">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="token" value="{{.Token}}">
+
+    {{if .UserEmail}}
+        <div class="form-field">
+            <label class="form-label">E-mail</label>
+            <input type="email" class="form-input" value="{{.UserEmail}}" disabled>
+        </div>
+    {{end}}
+
+    {{if .IsProfessor}}
+        <div class="form-field">
+            <label class="form-label">Turmas que você leciona</label>
+            {{if .AvailableClasses}}
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0;">
+                    {{range .AvailableClasses}}
+                        <label style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.88rem; cursor: pointer; background: var(--bg-page); color: var(--text-primary);">
+                            <input type="checkbox" name="classes" value="{{.Name}}">
+                            <span>{{.Name}}</span>
+                        </label>
+                    {{end}}
+                </div>
+            {{else}}
+                <input
+                    type="text"
+                    id="classes_csv"
+                    name="classes_csv"
+                    class="form-input"
+                    placeholder="Ex.: 2º ano · Informática, 3º ano · Redes"
+                    value="{{.ClassesCSV}}"
+                >
+            {{end}}
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Disciplinas</label>
+            {{if .AvailableSubjects}}
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0;">
+                    {{range .AvailableSubjects}}
+                        <label style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 0.88rem; cursor: pointer; background: var(--bg-page); color: var(--text-primary);">
+                            <input type="checkbox" name="subjects" value="{{.Name}}">
+                            <span>{{.Name}}</span>
+                        </label>
+                    {{end}}
+                </div>
+            {{else}}
+                <input
+                    type="text"
+                    id="subjects_csv"
+                    name="subjects_csv"
+                    class="form-input"
+                    placeholder="Ex.: Programação, Banco de Dados"
+                    value="{{.SubjectsCSV}}"
+                >
+            {{end}}
+        </div>
+    {{end}}
+
+    <div class="form-field">
+        <label for="password" class="form-label">Nova senha</label>
+        <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="Mínimo 6 caracteres"
+            minlength="6"
+            required
+            autocomplete="new-password"
+        >
+    </div>
+
+    <div class="form-field">
+        <label for="confirm_password" class="form-label">Confirmar senha</label>
+        <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            class="form-input"
+            placeholder="Repita a senha"
+            minlength="6"
+            required
+            autocomplete="new-password"
+        >
+    </div>
+
+    <button type="submit" class="btn-auth-primary">Ativar conta e entrar</button>
+</form>
+{{end}}

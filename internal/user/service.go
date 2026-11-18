@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"laboratory-management/internal/audit"
+	"strings"
 )
 
 // Service handles user business logic
@@ -126,6 +127,57 @@ func (s *Service) UpdateUser(id int, req *UpdateUserRequest, updaterID int) (*Us
 	existingUser.PasswordHash = ""
 
 	return existingUser, nil
+}
+
+// SetUserStatus activates or deactivates a user, protecting the primary admin and the acting user.
+func (s *Service) SetUserStatus(id int, newStatus string, actorID int, protectedAdminEmail string) error {
+	target, err := s.userRepo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("usuário não encontrado")
+	}
+	if target.ID == actorID || strings.EqualFold(target.Email, protectedAdminEmail) {
+		return fmt.Errorf("não é permitido alterar o status do usuário administrativo principal")
+	}
+	if newStatus != StatusActive && newStatus != StatusInactive {
+		return fmt.Errorf("status inválido")
+	}
+	if err := s.userRepo.SetStatus(id, newStatus); err != nil {
+		return err
+	}
+	if s.auditRepo != nil {
+		s.auditRepo.Create(&audit.AuditLog{
+			UserID:     &actorID,
+			Action:     audit.ActionUpdateUser,
+			EntityType: audit.EntityUser,
+			EntityID:   &id,
+			Details:    fmt.Sprintf("Changed status of %s (%s) to %s", target.Name, target.Email, newStatus),
+		})
+	}
+	return nil
+}
+
+// DeleteUserSafe deletes a non-primary user along with their bookings and notifications.
+func (s *Service) DeleteUserSafe(id int, deleterID int, protectedAdminEmail string) error {
+	target, err := s.userRepo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("usuário não encontrado")
+	}
+	if target.ID == deleterID || strings.EqualFold(target.Email, protectedAdminEmail) {
+		return fmt.Errorf("não é permitido excluir o usuário administrativo principal")
+	}
+	if err := s.userRepo.Delete(id); err != nil {
+		return fmt.Errorf("erro ao excluir usuário: %w", err)
+	}
+	if s.auditRepo != nil {
+		s.auditRepo.Create(&audit.AuditLog{
+			UserID:     &deleterID,
+			Action:     audit.ActionDeleteUser,
+			EntityType: audit.EntityUser,
+			EntityID:   &id,
+			Details:    fmt.Sprintf("Deleted user and bookings: %s (%s)", target.Name, target.Email),
+		})
+	}
+	return nil
 }
 
 // DeleteUser deletes a user

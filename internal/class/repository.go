@@ -20,7 +20,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) Create(cls *Class) error {
 	query := `
 		INSERT INTO classes (name, course, grade_year, shift, status)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES (?, ?, ?, ?, ?)
 		RETURNING id, created_at, updated_at
 	`
 	
@@ -45,7 +45,7 @@ func (r *Repository) GetByID(id int) (*Class, error) {
 	query := `
 		SELECT id, name, course, grade_year, shift, status, created_at, updated_at
 		FROM classes
-		WHERE id = $1
+		WHERE id = ?
 	`
 	
 	cls := &Class{}
@@ -113,8 +113,8 @@ func (r *Repository) GetAll() ([]*Class, error) {
 func (r *Repository) Update(cls *Class) error {
 	query := `
 		UPDATE classes 
-		SET name = $1, course = $2, grade_year = $3, shift = $4, status = $5, updated_at = $6
-		WHERE id = $7
+		SET name = ?, course = ?, grade_year = ?, shift = ?, status = ?, updated_at = ?
+		WHERE id = ?
 	`
 	
 	cls.UpdatedAt = time.Now()
@@ -148,7 +148,7 @@ func (r *Repository) Update(cls *Class) error {
 
 // Delete deletes a class
 func (r *Repository) Delete(id int) error {
-	query := `DELETE FROM classes WHERE id = $1`
+	query := `DELETE FROM classes WHERE id = ?`
 	
 	result, err := r.db.Exec(query, id)
 	if err != nil {

@@ -1,92 +1,68 @@
 {{define "content"}}
-<div class="dashboard">
-    <div class="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Bem-vindo, {{.User.Name}}!</p>
+<section class="painel-page">
+    <div class="page-hero">
+        <div>
+            <p class="page-eyebrow">VISÃO GERAL</p>
+            <h1 class="page-title">Um laboratório, muitas possibilidades.</h1>
+            <p class="page-subtitle">Acompanhe a utilização e organize suas próximas aulas.</p>
+        </div>
+        <span class="info-pill">Dados editáveis pelos cadastros e agendamentos</span>
     </div>
 
-    <div class="dashboard-stats">
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-content">
-                <h3>Próximos Agendamentos</h3>
-                <p class="stat-number">{{.Stats.UpcomingBookings}}</p>
-            </div>
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <p class="kpi-label">Reservas de hoje</p>
+            <p class="kpi-value">{{.Stats.TodayBookings}}</p>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-content">
-                <h3>Solicitações Pendentes</h3>
-                <p class="stat-number">{{.Stats.PendingBookings}}</p>
-            </div>
+        <div class="kpi-card">
+            <p class="kpi-label">Horários livres hoje</p>
+            <p class="kpi-value">{{.Stats.FreeSlotsToday}}</p>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">🔔</div>
-            <div class="stat-content">
-                <h3>Notificações</h3>
-                <p class="stat-number">{{.Stats.UnreadNotifications}}</p>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-                <h3>Total de Agendamentos</h3>
-                <p class="stat-number">{{.Stats.TotalBookings}}</p>
-            </div>
+        <div class="kpi-card">
+            <p class="kpi-label">Próximas reservas</p>
+            <p class="kpi-value">{{.Stats.UpcomingBookings}}</p>
         </div>
     </div>
 
-    <div class="dashboard-content">
-        <div class="dashboard-section">
-            <h2>Próximos Agendamentos</h2>
+    <div class="panel-grid">
+        <div class="card">
+            <h2 class="card-title-serif">Próximos agendamentos</h2>
             {{if .UpcomingBookings}}
-                <div class="booking-list">
+                <ul class="cadastro-list">
                     {{range .UpcomingBookings}}
-                        <div class="booking-card">
-                            <div class="booking-info">
-                                <h3>{{.Laboratory.Name}}</h3>
-                                <p class="booking-date">{{.BookingDate.Format "02/01/2006"}}</p>
-                                <p class="booking-time">{{.StartTime.Format "15:04"}} - {{.EndTime.Format "15:04"}}</p>
-                                <p class="booking-reason">{{.Reason}}</p>
-                            </div>
-                            <div class="booking-status status-{{.Status | lower}}">
-                                {{.Status}}
-                            </div>
-                        </div>
+                        <li class="cadastro-item">
+                            <span>
+                                <strong>{{.BookingDate.Format "02/01/2006"}}</strong> ·
+                                {{.StartTime.Format "15:04"}}–{{.EndTime.Format "15:04"}}
+                                {{if .TeacherName}} · {{.TeacherName}}{{end}}
+                                {{if .ClassName}} ({{.ClassName}}){{end}}
+                                {{if .SubjectName}} — {{.SubjectName}}{{end}}
+                            </span>
+                            <span class="info-pill">{{.Status}}</span>
+                        </li>
                     {{end}}
-                </div>
+                </ul>
             {{else}}
-                <div class="empty-state">
-                    <p>Nenhum agendamento próximo encontrado.</p>
-                    <a href="/agendamentos/novo" class="btn btn-primary">Criar Agendamento</a>
-                </div>
+                <p class="empty-copy">Nenhum agendamento futuro. Cadastre os dados e crie a primeira reserva.</p>
             {{end}}
         </div>
 
-        <div class="dashboard-section">
-            <h2>Ações Rápidas</h2>
-            <div class="quick-actions">
-                <a href="/agendamentos/novo" class="action-card">
-                    <span class="action-icon">➕</span>
-                    <span class="action-text">Novo Agendamento</span>
-                </a>
-                <a href="/disponibilidade" class="action-card">
-                    <span class="action-icon">🔍</span>
-                    <span class="action-text">Ver Disponibilidade</span>
-                </a>
-                <a href="/agenda" class="action-card">
-                    <span class="action-icon">📆</span>
-                    <span class="action-text">Ver Agenda</span>
-                </a>
-                <a href="/historico" class="action-card">
-                    <span class="action-icon">📜</span>
-                    <span class="action-text">Ver Histórico</span>
-                </a>
-            </div>
+        <div class="card">
+            <h2 class="card-title-serif">Resumo do dia</h2>
+            <p class="day-summary-date">{{.TodayFormatted}}</p>
+
+            {{range .ShiftSummaries}}
+                <div class="shift-summary-item">
+                    <p class="shift-summary-title">
+                        {{if eq .Key "MATUTINO"}}Manhã{{else if eq .Key "VESPERTINO"}}Tarde{{else}}Noite{{end}}
+                        · {{.FreeCount}} horários livres
+                    </p>
+                    <p class="shift-summary-slots">
+                        {{if .FreeLabels}}{{.FreeLabels}}{{else}}Todos os horários ocupados.{{end}}
+                    </p>
+                </div>
+            {{end}}
         </div>
     </div>
-</div>
+</section>
 {{end}}

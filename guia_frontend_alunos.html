@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Design e Frontend</title>
+<style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    h2 { color: #34495e; margin-top: 30px; }
+    h3 { color: #2980b9; }
+    ul { margin-bottom: 15px; }
+    li { margin-bottom: 5px; }
+    .note { background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<h1>🎨 Guia de Design e Frontend: Sistema de Gestão de Laboratório</h1>
+
+<p>Bem-vindos à equipe de Frontend e Design! Vocês serão responsáveis por dar vida ao nosso Sistema de Gestão e Agendamento de Laboratório. O objetivo de vocês é criar uma interface que seja bonita, moderna, intuitiva e fácil de usar.</p>
+
+<p>Todo o trabalho de design será feito no <strong>Figma</strong>, e posteriormente transformaremos esses designs em código HTML/CSS para integrar com o nosso servidor (que está sendo construído em Go).</p>
+
+<p>Abaixo, vocês encontram o detalhamento do que precisa ser desenhado e materiais de apoio para ajudá-los.</p>
+
+<hr>
+
+<h2>📱 1. Detalhamento das Telas (O que desenhar)</h2>
+
+<p>O sistema possui diferentes tipos de usuários (Alunos, Professores e Direção). As telas devem refletir as necessidades de cada um. Vocês precisam criar o design das seguintes páginas:</p>
+
+<h3>1.1. Autenticação (Login e Cadastro)</h3>
+<ul>
+    <li><strong>Propósito:</strong> É a porta de entrada do sistema. Deve passar credibilidade e ser super simples.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li><strong>Login:</strong> Campos de E-mail e Senha, botão "Entrar", link para "Esqueci minha senha" e link "Criar uma conta".</li>
+            <li><strong>Cadastro:</strong> Campos para Nome completo, E-mail, Senha, Confirmação de Senha, Matrícula, Telefone e seleção de Perfil (Aluno ou Professor). Botão "Cadastrar".</li>
+        </ul>
+    </li>
+    <li><strong>Dica de UI:</strong> Pensem em uma página dividida, onde de um lado fica o formulário e do outro uma imagem institucional ou ilustração legal do laboratório.</li>
+</ul>
+
+<h3>1.2. Dashboard (Tela Inicial)</h3>
+<ul>
+    <li><strong>Propósito:</strong> É a primeira tela que o usuário vê ao logar. Deve ser um painel de controle com o resumo do que está acontecendo.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li>Menu lateral (Sidebar) ou superior (Navbar) para navegação.</li>
+            <li>Mensagem de boas-vindas ("Olá, [Nome]").</li>
+            <li><strong>Cards de Resumo:</strong> Próximos agendamentos do usuário, solicitações pendentes de aprovação e notificações não lidas.</li>
+            <li>Botão de ação rápida: "Novo Agendamento".</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>1.3. Solicitação de Agendamento (Formulário)</h3>
+<ul>
+    <li><strong>Propósito:</strong> Onde o professor ou aluno pede para usar o laboratório.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li>Seleção de Data (idealmente um mini-calendário).</li>
+            <li>Seleção de Turno (Matutino, Vespertino, Noturno).</li>
+            <li>Horário inicial e Horário final.</li>
+            <li>Seleção de Turma.</li>
+            <li>Campo de texto para Motivo/Observação.</li>
+            <li>Área visual que mostre se o horário escolhido está "Disponível" ou "Ocupado".</li>
+            <li>Botões "Solicitar" e "Cancelar".</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>1.4. Meus Agendamentos e Histórico</h3>
+<ul>
+    <li><strong>Propósito:</strong> Permitir que o usuário veja tudo o que ele já agendou ou solicitou.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li>Uma tabela ou lista de cards bem organizada.</li>
+            <li>Colunas/Informações: Data, Horário, Turma, Motivo e <strong>Status</strong> (Pendente, Aprovado, Rejeitado, Cancelado).</li>
+            <li>Pensem em usar "Badges" (etiquetas coloridas) para os status: Verde para Aprovado, Amarelo para Pendente, Vermelho para Rejeitado.</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>1.5. Agenda / Calendário de Disponibilidade</h3>
+<ul>
+    <li><strong>Propósito:</strong> Uma visão geral do laboratório, para saber quando ele está livre ou ocupado.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li>Uma visualização no formato de calendário (pode ser visão semanal ou mensal).</li>
+            <li>Os horários ocupados devem aparecer como "blocos" no calendário.</li>
+            <li>Filtros para navegar entre as semanas e meses.</li>
+        </ul>
+    </li>
+</ul>
+
+<h3>1.6. Área da Direção (Administrativo)</h3>
+<ul>
+    <li><strong>Propósito:</strong> Telas exclusivas para os administradores aprovarem pedidos e gerenciarem o sistema.</li>
+    <li><strong>O que precisa ter:</strong>
+        <ul>
+            <li><strong>Gestão de Solicitações:</strong> Uma lista destacando as solicitações que estão <em>Pendentes</em>. Botões claros de "Aprovar" (verde) e "Rejeitar" (vermelho) para cada linha.</li>
+            <li><strong>Gestão de Usuários:</strong> Tabela listando todos os alunos e professores cadastrados, com opções para visualizar detalhes, ativar ou desativar contas.</li>
+        </ul>
+    </li>
+</ul>
+
+<hr>
+
+<h2>🎨 2. Como usar o Figma (Fluxo de Trabalho)</h2>
+
+<p>O Figma é a ferramenta padrão da indústria para design de interfaces. Vocês não precisam programar nada agora, apenas desenhar.</p>
+
+<ol>
+    <li><strong>Criação do Style Guide (Guia de Estilos):</strong> Antes de desenhar as telas, criem uma página no Figma só para definir:
+        <ul>
+            <li><strong>Cores:</strong> Qual o azul principal? Qual o vermelho de erro?</li>
+            <li><strong>Tipografia:</strong> Escolham fontes (ex: Inter, Roboto). Definam o tamanho do Título, Texto padrão, etc.</li>
+        </ul>
+    </li>
+    <li><strong>Uso de Componentes:</strong> Se vocês criarem um botão, transformem ele em um <strong>Componente</strong>. Assim, se decidirem mudar a cor do botão depois, muda em todas as telas automaticamente.</li>
+    <li><strong>Auto Layout:</strong> Estudem e usem o <strong>Auto Layout</strong> do Figma. Ele garante que os elementos fiquem alinhados e espaçados corretamente.</li>
+    <li><strong>Responsividade:</strong> Pensem primeiro em como a tela fica no computador (Desktop), mas não esqueçam de desenhar pelo menos as telas principais no formato de celular (Mobile).</li>
+</ol>
+
+<hr>
+
+<h2>📚 3. Materiais de Estudo Recomendados</h2>
+
+<p>Se vocês nunca usaram o Figma ou querem melhorar os conceitos de UI/UX, aqui estão dicas de busca:</p>
+
+<ul>
+    <li><strong>Dominando o Figma:</strong> Pesquisem no YouTube por "Figma para Iniciantes" ou "Figma Tutorial Series". Pesquisem também por "Como usar Auto Layout no Figma".</li>
+    <li><strong>Leis do UX:</strong> Acessem <em>lawsofux.com</em> para entender as regras psicológicas por trás de um bom design.</li>
+    <li><strong>Inspiração:</strong> Não comecem do zero. Olhem referências em <em>Dribbble.com</em> (pesquisem por "Dashboard") e <em>Mobbin.com</em>.</li>
+</ul>
+
+<div class="note">
+    <p>Mãos à obra! Foquem em fazer um design que vocês teriam orgulho de colocar no portfólio.</p>
+</div>
+
+</body>
+</html>

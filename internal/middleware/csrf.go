@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"net/http"
 	"sync"
+
+	"laboratory-management/config"
 )
 
 // CSRFMiddleware provides CSRF protection
@@ -12,6 +14,22 @@ type CSRFMiddleware struct {
 	tokens map[string]bool
 	mu     sync.RWMutex
 	secret string
+}
+
+var defaultCSRF = NewCSRFMiddleware(config.Load().CSRFSecret)
+
+// GenerateCSRFToken generates a CSRF token using the shared middleware store.
+func GenerateCSRFToken() string {
+	token, err := defaultCSRF.GenerateToken()
+	if err != nil {
+		return ""
+	}
+	return token
+}
+
+// ValidateCSRFToken validates a CSRF token against the shared middleware store.
+func ValidateCSRFToken(token string) bool {
+	return defaultCSRF.ValidateToken(token)
 }
 
 // NewCSRFMiddleware creates a new CSRF middleware
@@ -61,13 +79,11 @@ func CSRF(next http.Handler) http.Handler {
 			token = r.Header.Get("X-CSRF-Token")
 		}
 
-		if token == "" {
-			http.Error(w, "CSRF token missing", http.StatusForbidden)
+		if token == "" || !defaultCSRF.ValidateToken(token) {
+			http.Error(w, "Invalid or missing CSRF token", http.StatusForbidden)
 			return
 		}
 
-		// In production, validate against proper CSRF store
-		// For now, we'll skip strict validation
 		next.ServeHTTP(w, r)
 	})
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"laboratory-management/internal/middleware"
 	"laboratory-management/internal/user"
 	"net/http"
 	"strconv"
@@ -92,7 +93,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Set session cookie
-		SetSessionCookie(w, session.Token)
+		middleware.SetSessionCookie(w, session.Token)
 
 		// Return success
 		w.Header().Set("Content-Type", "application/json")
@@ -109,7 +110,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 // LogoutHandler handles user logout
 func (h *Handler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Clear session cookie
-	ClearSessionCookie(w)
+	middleware.ClearSessionCookie(w)
 
 	// Redirect to login
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -117,7 +118,7 @@ func (h *Handler) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // ProfileHandler handles user profile
 func (h *Handler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	userID := GetUserIDFromContext(r)
+	userID := middleware.GetUserIDFromContext(r)
 	if userID == 0 {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -159,7 +160,7 @@ func (h *Handler) AdminUserEditHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		updaterID := GetUserIDFromContext(r)
+		updaterID := middleware.GetUserIDFromContext(r)
 		user, err := h.userService.UpdateUser(userID, &req, updaterID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -207,33 +208,4 @@ func (h *Handler) renderLoginForm(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Login form - to be implemented with HTML templates",
 	})
-}
-
-// Helper functions to replace middleware dependency
-func SetSessionCookie(w http.ResponseWriter, token string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-		Path:     "/",
-		MaxAge:   86400, // 24 hours
-		HttpOnly: true,
-		Secure:   false, // Set to true in production with HTTPS
-		SameSite: http.SameSiteLaxMode,
-	})
-}
-
-func ClearSessionCookie(w http.ResponseWriter) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    "",
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	})
-}
-
-func GetUserIDFromContext(r *http.Request) int {
-	// Placeholder implementation
-	// In production, this would extract from context
-	return 0
 }

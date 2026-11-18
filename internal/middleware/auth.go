@@ -2,8 +2,17 @@ package middleware
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
+
+	"laboratory-management/config"
 )
 
 // Context keys
@@ -43,12 +52,9 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// For now, we'll parse user info from the cookie
-		// In production, this should come from a validated session
-		// This is a placeholder - proper session management needed
-		userID, userEmail, userRole := parseSessionCookie(cookie.Value)
+		userID, userEmail, userRole, ok := VerifySessionToken(cookie.Value, config.Load().SessionSecret)
 
-		if userID == 0 {
+		if !ok || userID == 0 {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -101,18 +107,56 @@ func RequireTeacherOrAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return RequireRole(RoleProfessor, RoleAdmin)(next)
 }
 
-// parseSessionCookie parses session info from cookie (placeholder)
-// In production, this should validate against a session store
-func parseSessionCookie(cookieValue string) (int, string, string) {
-	// This is a simplified placeholder
-	// In production, implement proper session validation
-	parts := strings.Split(cookieValue, "|")
-	if len(parts) >= 3 {
-		// format: userID|email|role
-		// This is NOT secure - just for development
-		return 1, parts[1], parts[2] // placeholder
+// SignSessionToken creates an HMAC-SHA256 signed session token containing user identity and expiration.
+func SignSessionToken(userID int, email, role string, ttl time.Duration, secret string) string {
+	exp := time.Now().Add(ttl).Unix()
+	payload := fmt.Sprintf("%d|%s|%s|%d", userID, email, role, exp)
+	encoded := base64.RawURLEncoding.EncodeToString([]byte(payload))
+
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(encoded))
+	sig := hex.EncodeToString(mac.Sum(nil))
+
+	return encoded + "." + sig
+}
+
+// VerifySessionToken validates the HMAC signature and expiration of a session token.
+func VerifySessionToken(token, secret string) (int, string, string, bool) {
+	parts := strings.Split(token, ".")
+	if len(parts) != 2 {
+		return 0, "", "", false
 	}
-	return 0, "", ""
+
+	encoded, sig := parts[0], parts[1]
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(encoded))
+	expectedSig := hex.EncodeToString(mac.Sum(nil))
+
+	if !hmac.Equal([]byte(sig), []byte(expectedSig)) {
+		return 0, "", "", false
+	}
+
+	raw, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return 0, "", "", false
+	}
+
+	fields := strings.Split(string(raw), "|")
+	if len(fields) != 4 {
+		return 0, "", "", false
+	}
+
+	userID, err := strconv.Atoi(fields[0])
+	if err != nil || userID <= 0 {
+		return 0, "", "", false
+	}
+
+	exp, err := strconv.ParseInt(fields[3], 10, 64)
+	if err != nil || time.Now().Unix() > exp {
+		return 0, "", "", false
+	}
+
+	return userID, fields[1], fields[2], true
 }
 
 // GetUserIDFromContext retrieves user ID from request context

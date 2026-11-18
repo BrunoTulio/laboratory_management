@@ -20,6 +20,9 @@ type Booking struct {
 	StartTime        time.Time  `json:"start_time"`
 	EndTime          time.Time  `json:"end_time"`
 	Shift            string     `json:"shift"`
+	TeacherName      string     `json:"teacher_name,omitempty"`
+	SubjectName      string     `json:"subject_name,omitempty"`
+	ClassName        string     `json:"class_name,omitempty"`
 	Reason           string     `json:"reason"`
 	Observation      string     `json:"observation"`
 	Status           string     `json:"status"`
@@ -52,6 +55,9 @@ type CreateBookingRequest struct {
 	StartTime    time.Time `json:"start_time"`
 	EndTime      time.Time `json:"end_time"`
 	Shift        string    `json:"shift"`
+	TeacherName  string    `json:"teacher_name,omitempty"`
+	ClassName    string    `json:"class_name,omitempty"`
+	SubjectName  string    `json:"subject_name,omitempty"`
 	Reason       string    `json:"reason"`
 	Observation  string    `json:"observation"`
 }

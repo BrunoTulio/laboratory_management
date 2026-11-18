@@ -1,125 +1,169 @@
 {{define "content"}}
-<div class="booking-create-page">
-    <div class="page-header">
-        <h1>Novo Agendamento</h1>
-        <a href="/agendamentos" class="btn btn-secondary">Voltar</a>
+<section class="booking-create-page">
+    <div class="page-hero">
+        <div>
+            <p class="page-eyebrow">NOVA RESERVA</p>
+            <h1 class="page-title">Novo agendamento</h1>
+            <p class="page-subtitle">Escolha a data, o período, as aulas (1ª a 5ª/6ª), turma e disciplina.</p>
+        </div>
+        <a href="/agenda" class="btn btn-secondary">Voltar à agenda</a>
     </div>
 
-    <form method="POST" action="/agendamentos" class="form">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <div class="card">
+        <form method="POST" action="/agendamentos/novo" class="field-group" style="gap: 18px;">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-        <div class="form-section">
-            <h2>Informações do Agendamento</h2>
-
-            <div class="form-field">
-                <label for="laboratory_id" class="form-label">Laboratório *</label>
-                <select id="laboratory_id" name="laboratory_id" class="form-select" required>
-                    <option value="">Selecione um laboratório</option>
-                    {{range .Laboratories}}
-                        <option value="{{.ID}}" {{if eq .ID $.FormData.LaboratoryID}}selected{{end}}>
-                            {{.Name}} - {{.Location}} (Capacidade: {{.Capacity}})
-                        </option>
-                    {{end}}
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="booking_date" class="form-label">Data *</label>
-                <input 
-                    type="date" 
-                    id="booking_date" 
-                    name="booking_date" 
-                    class="form-input" 
-                    required
-                    value="{{.FormData.BookingDate}}"
-                    min="{{.MinDate}}"
-                >
-            </div>
-
-            <div class="form-row">
-                <div class="form-field">
-                    <label for="start_time" class="form-label">Horário Início *</label>
-                    <input 
-                        type="time" 
-                        id="start_time" 
-                        name="start_time" 
-                        class="form-input" 
-                        required
-                        value="{{.FormData.StartTime}}"
-                    >
+            <div class="filters-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 0;">
+                <div class="field-group">
+                    <label for="laboratory_id" class="field-label">Laboratório *</label>
+                    <select id="laboratory_id" name="laboratory_id" class="field-select" required>
+                        {{range .Laboratories}}
+                            <option value="{{.ID}}">{{.Name}} ({{.Location}})</option>
+                        {{end}}
+                    </select>
                 </div>
 
-                <div class="form-field">
-                    <label for="end_time" class="form-label">Horário Fim *</label>
-                    <input 
-                        type="time" 
-                        id="end_time" 
-                        name="end_time" 
-                        class="form-input" 
-                        required
-                        value="{{.FormData.EndTime}}"
-                    >
+                <div class="field-group">
+                    <label for="booking_date" class="field-label">Data *</label>
+                    <input type="date" id="booking_date" name="booking_date" class="field-input" required min="{{.MinDate}}" value="{{.FormData.BookingDate}}">
+                </div>
+
+                <div class="field-group">
+                    <label for="shift" class="field-label">Período *</label>
+                    <select id="shift" name="shift" class="field-select" onchange="updateLessonOptions()">
+                        <option value="MATUTINO" {{if eq .FormData.Shift "MATUTINO"}}selected{{end}}>Manhã (07h30–11h30)</option>
+                        <option value="VESPERTINO" {{if eq .FormData.Shift "VESPERTINO"}}selected{{end}}>Tarde (13h–17h)</option>
+                        <option value="NOTURNO" {{if eq .FormData.Shift "NOTURNO"}}selected{{end}}>Noite (18h50–21h50)</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="form-field">
-                <label for="shift" class="form-label">Turno</label>
-                <select id="shift" name="shift" class="form-select">
-                    <option value="">Selecione o turno</option>
-                    <option value="MATUTINO" {{if eq .FormData.Shift "MATUTINO"}}selected{{end}}>Matutino</option>
-                    <option value="VESPERTINO" {{if eq .FormData.Shift "VESPERTINO"}}selected{{end}}>Vespertino</option>
-                    <option value="NOTURNO" {{if eq .FormData.Shift "NOTURNO"}}selected{{end}}>Noturno</option>
-                </select>
+            <div class="field-group">
+                <span class="field-label">Selecione a(s) aula(s) *</span>
+                <div id="lessons_container" style="display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px;"></div>
             </div>
 
-            <div class="form-field">
-                <label for="class_id" class="form-label">Turma</label>
-                <select id="class_id" name="class_id" class="form-select">
-                    <option value="">Selecione uma turma (opcional)</option>
-                    {{range .Classes}}
-                        <option value="{{.ID}}" {{if eq .ID $.FormData.ClassID}}selected{{end}}>
-                            {{.Name}} - {{.Course}} ({{.GradeYear}})
-                        </option>
+            <div class="filters-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 0;">
+                {{if .IsAdmin}}
+                    <div class="field-group">
+                        <label for="teacher_name" class="field-label">Professor</label>
+                        <input type="text" id="teacher_name" name="teacher_name" class="field-input" placeholder="Nome do professor" value="{{.FormData.TeacherName}}">
+                    </div>
+                {{end}}
+
+                <div class="field-group">
+                    <label for="class_name" class="field-label">Turma</label>
+                    {{if .ClassOptions}}
+                        <select id="class_name" name="class_name" class="field-select" onchange="filterSubjectsByClass()">
+                            <option value="">Selecione...</option>
+                            {{range .ClassOptions}}
+                                <option value="{{.}}" {{if eq $.FormData.ClassName .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    {{else}}
+                        <input type="text" id="class_name" name="class_name" class="field-input" placeholder="Ex.: 2º ano · Informática" value="{{.FormData.ClassName}}">
                     {{end}}
-                </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="subject_name" class="field-label">Disciplina</label>
+                    {{if .SubjectOptions}}
+                        <select id="subject_name" name="subject_name" class="field-select">
+                            <option value="">Selecione...</option>
+                            {{range .SubjectOptions}}
+                                <option value="{{.}}" {{if eq $.FormData.SubjectName .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    {{else}}
+                        <input type="text" id="subject_name" name="subject_name" class="field-input" placeholder="Ex.: Programação" value="{{.FormData.SubjectName}}">
+                    {{end}}
+                </div>
+
+                <div class="field-group">
+                    <label for="reason" class="field-label">Motivo / Atividade *</label>
+                    <input type="text" id="reason" name="reason" class="field-input" placeholder="Ex.: Aula prática de algoritmos" required value="{{.FormData.Reason}}">
+                </div>
             </div>
 
-            <div class="form-field">
-                <label for="reason" class="form-label">Motivo *</label>
-                <textarea 
-                    id="reason" 
-                    name="reason" 
-                    class="form-textarea" 
-                    rows="3"
-                    required
-                    placeholder="Descreva o motivo do agendamento"
-                >{{.FormData.Reason}}</textarea>
+            <div class="field-group">
+                <label for="observation" class="field-label">Observações</label>
+                <input type="text" id="observation" name="observation" class="field-input" placeholder="Softwares necessários, observações adicionais..." value="{{.FormData.Observation}}">
             </div>
 
-            <div class="form-field">
-                <label for="observation" class="form-label">Observação</label>
-                <textarea 
-                    id="observation" 
-                    name="observation" 
-                    class="form-textarea" 
-                    rows="2"
-                    placeholder="Informações adicionais (opcional)"
-                >{{.FormData.Observation}}</textarea>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <a href="/agenda" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Confirmar agendamento</button>
             </div>
-        </div>
+        </form>
+    </div>
+</section>
 
-        <div class="availability-check">
-            <h3>Verificar Disponibilidade</h3>
-            <div id="availability_result" class="availability-result">
-                <p>Selecione laboratório, data e horário para verificar disponibilidade.</p>
-            </div>
-            <button type="button" class="btn btn-secondary" id="check_availability">Verificar Disponibilidade</button>
-        </div>
+<script>
+const shiftLessons = {
+    MATUTINO: [
+        { num: 1, label: "1ª aula (07:30–08:15)" },
+        { num: 2, label: "2ª aula (08:15–09:00)" },
+        { num: 3, label: "3ª aula (09:15–10:00)" },
+        { num: 4, label: "4ª aula (10:00–10:45)" },
+        { num: 5, label: "5ª aula (10:45–11:30)" }
+    ],
+    VESPERTINO: [
+        { num: 1, label: "1ª aula (13:00–13:45)" },
+        { num: 2, label: "2ª aula (13:45–14:30)" },
+        { num: 3, label: "3ª aula (14:30–15:15)" },
+        { num: 4, label: "4ª aula (15:30–16:15)" },
+        { num: 5, label: "5ª aula (16:15–17:00)" }
+    ],
+    NOTURNO: [
+        { num: 1, label: "1ª aula (18:50–19:20)" },
+        { num: 2, label: "2ª aula (19:20–19:50)" },
+        { num: 3, label: "3ª aula (19:50–20:20)" },
+        { num: 4, label: "4ª aula (20:20–20:50)" },
+        { num: 5, label: "5ª aula (20:50–21:20)" },
+        { num: 6, label: "6ª aula (21:20–21:50)" }
+    ]
+};
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Solicitar Agendamento</button>
-            <a href="/agendamentos" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+const preselectedLesson = "{{.FormData.Lesson}}";
+const classSubjectsMap = {{if .ClassSubjectsJSON}}{{.ClassSubjectsJSON}}{{else}}{}{{end}};
+const allSubjects = [{{range .SubjectOptions}}"{{.}}",{{end}}];
+
+function filterSubjectsByClass() {
+    const classEl = document.getElementById("class_name");
+    const subjectEl = document.getElementById("subject_name");
+    if (!classEl || !subjectEl || subjectEl.tagName !== "SELECT") return;
+
+    const selectedClass = classEl.value;
+    const currentSubject = subjectEl.value;
+    const linked = (selectedClass && classSubjectsMap[selectedClass] && classSubjectsMap[selectedClass].length > 0)
+        ? classSubjectsMap[selectedClass]
+        : allSubjects;
+
+    subjectEl.innerHTML = `<option value="">Selecione...</option>` + linked.map(s => {
+        const sel = s === currentSubject ? "selected" : "";
+        return `<option value="${s}" ${sel}>${s}</option>`;
+    }).join("");
+}
+
+function updateLessonOptions() {
+    const shift = document.getElementById("shift").value || "MATUTINO";
+    const container = document.getElementById("lessons_container");
+    const items = shiftLessons[shift] || shiftLessons.MATUTINO;
+
+    container.innerHTML = items.map(item => {
+        const checked = preselectedLesson && Number(preselectedLesson) === item.num ? "checked" : "";
+        return `
+            <label style="display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--bg-muted);color:var(--text-primary);cursor:pointer;font-size:0.88rem;font-weight:500;">
+                <input type="checkbox" name="lessons" value="${item.num}" ${checked}>
+                <span>${item.label}</span>
+            </label>
+        `;
+    }).join("");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateLessonOptions();
+    filterSubjectsByClass();
+});
+</script>
 {{end}}
